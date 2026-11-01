@@ -4,7 +4,8 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
   <title>B-17G Tailgunner: Cheyenne Turret Over Europe</title>
-  <script src="https://cdn.tailwindcss.com"></script>
+  <!-- Pre-built Tailwind v3 styles (regenerate if you add new Tailwind classes — see README) -->
+  <link rel="stylesheet" href="./assets/hud.css">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Chakra+Petch:ital,wght@0,500;0,700;1,700&family=Share+Tech+Mono&display=swap" rel="stylesheet">
@@ -520,7 +521,9 @@
     scene.add(hemiLight);
 
     const sunLight = new THREE.DirectionalLight(0xfffbeb, 2.2);
-    sunLight.position.set(180, 320, 140);
+    // Sun high and slightly behind the gunner (forward of the bomber, -Z) so the noses of the trailing
+    // wingmen and the attacking fighters — the sides you actually see from the tail — are sunlit.
+    sunLight.position.set(-160, 320, -220);
     scene.add(sunLight);
 
     // ============================================================================
@@ -937,8 +940,9 @@
     }
 
     // Place two wingmen slightly behind & off port/starboard so the player sees the Combat Box
-    wingmen.push(createWingmanB17(-58, -6, 44));
-    wingmen.push(createWingmanB17(66, 8, 56));
+    // Trailing elements of the combat box, ~24° off the tail so they sit inside the turret's field of view
+    wingmen.push(createWingmanB17(-34, -9, 76));
+    wingmen.push(createWingmanB17(40, 7, 96));
 
     // Hot-swap Player Empennage and Wingman B-17s when `b17.glb` loads
     let playerGLBBomberMesh = null;
