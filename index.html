@@ -95,6 +95,22 @@
     .overheat-blink {
       animation: pulse-warn 0.35s infinite;
     }
+    /* Shattered-glass bullet holes on the Cheyenne turret glazing */
+    #glass-damage { position: fixed; inset: 0; pointer-events: none; z-index: 12; }
+    .bullet-hole { position: absolute; transform: translate(-50%, -50%); animation: hole-in 0.12s ease-out; }
+    @keyframes hole-in { from { opacity: 0; transform: translate(-50%, -50%) scale(0.4); } to { opacity: 1; } }
+    #impact-flash { position: fixed; inset: 0; pointer-events: none; z-index: 16; background: #fff7e6; opacity: 0; transition: opacity 0.25s ease-out; }
+    /* Kill-cam: hide everything that belongs to the inside of the turret */
+    body.killcam .plexiglass-glare, body.killcam .turret-vignette, body.killcam #crosshair-container,
+    body.killcam #hud-root, body.killcam #glass-damage, body.killcam #damage-overlay { display: none; }
+    #killcam { position: fixed; inset: 0; pointer-events: none; z-index: 35; display: none; }
+    body.killcam #killcam { display: block; }
+    #killcam .bar { position: absolute; left: 0; right: 0; height: 10vh; background: #000; }
+    #killcam .bar.top { top: 0; } #killcam .bar.bottom { bottom: 0; }
+    #killcam-caption { position: absolute; left: 5vw; top: calc(10vh + 18px); font-family: 'Chakra Petch', sans-serif; color: #fde68a;
+      text-shadow: 0 2px 10px rgba(0,0,0,0.9); letter-spacing: 0.12em; text-transform: uppercase; }
+    #killcam-caption .big { font-size: clamp(22px, 4vw, 44px); font-weight: 700; color: #fff; }
+    #killcam-caption .small { font-size: clamp(11px, 1.3vw, 15px); color: #fca5a5; margin-top: 2px; }
     .drop-zone-active {
       outline: 3px dashed #38bdf8;
       outline-offset: -12px;
@@ -114,6 +130,18 @@
   <div class="plexiglass-glare"></div>
   <div class="turret-vignette"></div>
   <div id="damage-overlay" class="damage-flash"></div>
+  <div id="glass-damage"></div>
+  <div id="impact-flash"></div>
+
+  <!-- Kill-cam letterbox + caption (shown while watching our B-17 go down) -->
+  <div id="killcam">
+    <div class="bar top"></div>
+    <div class="bar bottom"></div>
+    <div id="killcam-caption">
+      <div class="big">Fortress Going Down</div>
+      <div id="killcam-killer" class="small">Shot down by BF 109G-6</div>
+    </div>
+  </div>
 
   <!-- Drag & Drop Overlay Prompt -->
   <div id="drop-overlay" class="fixed inset-0 z-50 pointer-events-none hidden flex items-center justify-center bg-slate-950/75 backdrop-blur-sm">
@@ -159,7 +187,7 @@
   </div>
 
   <!-- HEADS UP DISPLAY (HUD) -->
-  <div class="fixed inset-0 pointer-events-none z-30 flex flex-col justify-between p-3 sm:p-5">
+  <div id="hud-root" class="fixed inset-0 pointer-events-none z-30 flex flex-col justify-between p-3 sm:p-5">
     
     <!-- Top Bar: Mission Telemetry, Asset Status & Wave Status -->
     <div class="flex flex-wrap justify-between items-start gap-2">
@@ -1651,15 +1679,19 @@
       }
     }
 
-    function spawnSmokePuff(position, isDark = true) {
-      const r = 0.95 + Math.random() * 0.8;
-      const mat = new THREE.MeshBasicMaterial({
-        color: isDark ? 0x1f2421 : 0xf97316,
+    function spawnSmokePuff(position, isDark = true, lifeScale = 1, sizeScale = 1) {
+      // Soft camera-facing puff using the procedural cloud texture (no hard polygon edges)
+      const r = (0.95 + Math.random() * 0.8) * sizeScale * 2.6;
+      const mat = new THREE.SpriteMaterial({
+        map: cloudTextures[Math.floor(Math.random() * cloudTextures.length)],
+        color: isDark ? 0x2a2e2b : 0xff8a1f,
         transparent: true,
         opacity: isDark ? 0.72 : 0.9,
-        depthWrite: false
+        depthWrite: false,
+        blending: isDark ? THREE.NormalBlending : THREE.AdditiveBlending
       });
-      const mesh = new THREE.Mesh(unitPuffGeo, mat);
+      mat.rotation = Math.random() * Math.PI * 2;
+      const mesh = new THREE.Sprite(mat);
       mesh.scale.setScalar(r);
       mesh.position.copy(position);
       scene.add(mesh);
@@ -1669,8 +1701,9 @@
         mat,
         r,
         age: 0,
-        maxAge: isDark ? 1.6 : 0.35,
-        growRate: isDark ? 2.8 : 4.2
+        maxAge: (isDark ? 1.6 : 0.35) * lifeScale,
+        growRate: isDark ? 2.8 : 4.2,
+        baseOpacity: isDark ? 0.85 : 1.0
       });
     }
 
@@ -1696,7 +1729,8 @@
       waveEnemiesRemainingToSpawn: 0,
       spawnCooldown: 0,
       flakTimer: 0,
-      contrailTimer: 0
+      contrailTimer: 0,
+      lastAttacker: null
     };
 
     const raycaster = new THREE.Raycaster();
@@ -1900,6 +1934,8 @@
       playerBullets.length = 0;
       enemyBullets.forEach(b => scene.remove(b.mesh));
       enemyBullets.length = 0;
+      resetDeathCam();
+      clearBulletHoles();
 
       state.running = true;
       state.wave = 1;
@@ -1922,8 +1958,8 @@
       leadIndicatorEl.classList.add('hidden');
       targetBracketEl.classList.add('hidden');
 
-      modalTitleEl.textContent = 'TAIL TURRET KNOCKED OUT';
-      modalDescEl.textContent = 'Heavy 20mm Minengeschoss cannon fire shattered the Cheyenne tail station. Review your combat log and man the guns for another sortie.';
+      modalTitleEl.textContent = 'FORTRESS DOWN';
+      modalDescEl.textContent = 'Heavy 20mm Minengeschoss cannon fire shattered the Cheyenne tail station and set the port engines ablaze. Review your combat log and man the guns for another sortie.';
       document.getElementById('stat-wave').textContent = String(state.wave);
       document.getElementById('stat-kills').textContent = String(state.kills);
       document.getElementById('stat-shots').textContent = String(state.shotsFired);
@@ -1946,7 +1982,9 @@
     }
 
     function triggerDamageFlash(amount) {
+      if (!state.running) return;
       state.health = Math.max(0, state.health - amount);
+      addBulletHole();
       updateHealthUI();
       damageOverlayEl.style.opacity = '0.85';
       setTimeout(() => {
@@ -1954,8 +1992,237 @@
       }, 140);
 
       if (state.health <= 0 && state.running) {
+        beginShootDown();
+      }
+    }
+
+    // ============================================================================
+    // 11b. SHATTERED GLASS, SHOOT-DOWN SEQUENCE & KILL-CAM
+    // ============================================================================
+    const glassDamageEl = document.getElementById('glass-damage');
+    const impactFlashEl = document.getElementById('impact-flash');
+    const killcamKillerEl = document.getElementById('killcam-killer');
+
+    // Procedural SVG bullet hole: dark puncture, frosted ring and jagged radial cracks
+    function addBulletHole() {
+      if (glassDamageEl.children.length >= 16) glassDamageEl.firstElementChild.remove();
+      const size = 46 + Math.random() * 70;
+      let cracks = '';
+      const n = 6 + Math.floor(Math.random() * 5);
+      for (let i = 0; i < n; i++) {
+        const a = (i / n) * Math.PI * 2 + Math.random() * 0.5;
+        const len = 22 + Math.random() * 26;
+        const kink = a + (Math.random() - 0.5) * 0.5;
+        const mx = Math.cos(kink) * len * 0.5, my = Math.sin(kink) * len * 0.5;
+        const ex = Math.cos(a) * len, ey = Math.sin(a) * len;
+        cracks += `<polyline points="0,0 ${mx.toFixed(1)},${my.toFixed(1)} ${ex.toFixed(1)},${ey.toFixed(1)}" />`;
+      }
+      const ring = 10 + Math.random() * 6;
+      const el = document.createElement('div');
+      el.className = 'bullet-hole';
+      el.style.left = `${10 + Math.random() * 80}%`;
+      el.style.top = `${12 + Math.random() * 70}%`;
+      el.innerHTML = `<svg width="${size}" height="${size}" viewBox="-50 -50 100 100" style="transform: rotate(${Math.random() * 360}deg)">
+        <circle r="${ring + 6}" fill="rgba(220,235,255,0.10)" />
+        <g fill="none" stroke="rgba(235,245,255,0.6)" stroke-width="0.9" stroke-linejoin="round">${cracks}</g>
+        <circle r="${ring}" fill="none" stroke="rgba(240,248,255,0.55)" stroke-width="1.4" stroke-dasharray="3 2" />
+        <circle r="4.5" fill="rgba(8,10,12,0.9)" stroke="rgba(255,255,255,0.45)" stroke-width="0.8" />
+      </svg>`;
+      glassDamageEl.appendChild(el);
+    }
+
+    function clearBulletHoles() {
+      glassDamageEl.innerHTML = '';
+    }
+
+    const deathCam = {
+      active: false,
+      t: 0,
+      phase: 'impact',      // 'impact' (shaking turret) -> 'cam' (outside view) -> 'done'
+      actor: null,          // cinematic copy of the fighter that shot us down
+      side: 1,
+      center0: new THREE.Vector3(),   // bomber centre (bomberGroup-local)
+      engineL: new THREE.Vector3(),   // burning port inboard engine (local)
+      engineR: new THREE.Vector3(),   // smoking starboard outboard engine (local)
+      disp: new THREE.Vector3(),
+      vel: new THREE.Vector3(),
+      actorStart: new THREE.Vector3(),
+      camPos: new THREE.Vector3(),
+      smokeTimer: 0,
+      events: null,
+      exploded: false
+    };
+
+    function beginShootDown() {
+      state.running = false;
+      state.isFiring = false;
+      leadIndicatorEl.classList.add('hidden');
+      targetBracketEl.classList.add('hidden');
+
+      deathCam.active = true;
+      deathCam.phase = 'impact';
+      deathCam.t = 0;
+      deathCam.exploded = false;
+      deathCam.events = { hole1: false, hole2: false, flash: false, ex1: false, ex2: false };
+      for (let i = 0; i < 3; i++) addBulletHole();
+      sound.playExplosion(1.2);
+    }
+
+    function startKillCam() {
+      deathCam.phase = 'cam';
+      document.body.classList.add('killcam');
+      impactFlashEl.style.opacity = '0';
+      camera.position.set(0, 0.65, 0);
+
+      // Work out where the airframe actually is (GLB or procedural) in bomberGroup-local space
+      bomberGroup.position.set(0, 0, 0);
+      bomberGroup.rotation.set(0, 0, 0);
+      bomberGroup.updateMatrixWorld(true);
+      const src = playerGLBBomberMesh || proceduralEmpennageGroup;
+      const box = new THREE.Box3().setFromObject(src);
+      const size = new THREE.Vector3();
+      box.getSize(size);
+      if (playerGLBBomberMesh) {
+        box.getCenter(deathCam.center0);
+        const nose = box.min.z;
+        const engZ = nose + size.z * 0.3;
+        deathCam.engineL.set(-size.x * 0.15, deathCam.center0.y - 0.2, engZ);
+        deathCam.engineR.set(size.x * 0.3, deathCam.center0.y - 0.2, engZ + 0.6);
+      } else {
+        deathCam.center0.set(0, 0, -8);
+        deathCam.engineL.set(-1.2, 0, -10);
+        deathCam.engineR.set(1.2, 0, -10);
+      }
+
+      // The fighter that got us (or the nearest one, or a fresh Bf 109 if the sky is empty)
+      let killer = state.lastAttacker && !state.lastAttacker.isDead ? state.lastAttacker : null;
+      if (!killer) {
+        let best = Infinity;
+        for (const e of enemies) {
+          if (!e.isDead && e.mesh.position.length() < best) { best = e.mesh.position.length(); killer = e; }
+        }
+      }
+      const type = killer ? killer.type : 'BF109';
+      const name = killer ? killer.name : 'BF 109G-6';
+      if (killer) killer.mesh.visible = false; // the cinematic actor stands in for it
+      killcamKillerEl.textContent = `Shot down by ${name}`;
+
+      deathCam.side = killer && killer.mesh.position.x < 0 ? -1 : 1;
+      const built = buildFighterMesh(type);
+      deathCam.actor = built;
+      scene.add(built.group);
+      deathCam.actorStart.copy(deathCam.center0).add(new THREE.Vector3(deathCam.side * 30, -4, 30));
+      deathCam.actor.group.position.copy(deathCam.actorStart);
+
+      deathCam.disp.set(0, 0, 0);
+      deathCam.vel.set(0, -1.5, 3);
+      deathCam.camOffset = new THREE.Vector3(deathCam.side * 36, 8, 52);
+      deathCam.camPos.copy(deathCam.center0).add(deathCam.camOffset);
+      camera.position.copy(deathCam.camPos);
+      camera.lookAt(bomberGroup.localToWorld(deathCam.center0.clone()));
+      deathCam.t = 0;
+    }
+
+    function updateDeathCam(dt) {
+      deathCam.t += dt;
+      const t = deathCam.t;
+
+      if (deathCam.phase === 'impact') {
+        // Turret takes the fatal burst: violent shake, more holes, white-out, then cut outside
+        const shake = 0.06 * (1 - t / 0.9);
+        camera.position.set((Math.random() - 0.5) * shake, 0.65 + (Math.random() - 0.5) * shake, 0);
+        camera.lookAt(cameraTarget);
+        if (t > 0.25 && !deathCam.events.hole1) { deathCam.events.hole1 = true; addBulletHole(); addBulletHole(); }
+        if (t > 0.5 && !deathCam.events.hole2) { deathCam.events.hole2 = true; addBulletHole(); addBulletHole(); sound.playExplosion(0.8); }
+        if (t > 0.72 && !deathCam.events.flash) { deathCam.events.flash = true; impactFlashEl.style.opacity = '0.95'; }
+        if (t > 0.95) startKillCam();
+        return;
+      }
+
+      // --- Our B-17 rolls left, noses down and falls back out of the formation ---
+      deathCam.vel.y -= 6.5 * dt;
+      deathCam.vel.z += 4.0 * dt;
+      deathCam.vel.x -= 1.2 * dt;
+      deathCam.disp.addScaledVector(deathCam.vel, dt);
+
+      if (!deathCam.exploded) {
+        bomberGroup.rotation.set(-Math.min(0.75, 0.05 * t * t), 0, Math.min(1.6, 0.06 * t * t + 0.05 * t));
+        const centerWorld = deathCam.center0.clone().add(deathCam.disp);
+        const rotatedCenter = deathCam.center0.clone().applyEuler(bomberGroup.rotation);
+        bomberGroup.position.copy(centerWorld).sub(rotatedCenter); // rotate about the airframe centre, not the tail
+
+        // Fire + smoke pouring from the port inboard engine, thinner smoke from starboard
+        deathCam.smokeTimer -= dt;
+        if (deathCam.smokeTimer <= 0) {
+          deathCam.smokeTimer = 0.04;
+          const pL = bomberGroup.localToWorld(deathCam.engineL.clone());
+          spawnSmokePuff(pL, true, 2.4, 0.9);
+          spawnSmokePuff(pL, false, 1.6, 0.7);   // flames licking out of the nacelle
+          spawnSmokePuff(bomberGroup.localToWorld(deathCam.engineR.clone()), true, 1.6, 0.55);
+        }
+        if (t > 1.4 && !deathCam.events.ex1) {
+          deathCam.events.ex1 = true;
+          spawnExplosion(bomberGroup.localToWorld(deathCam.engineL.clone()), 0.7);
+        }
+        if (t > 3.3 && !deathCam.events.ex2) {
+          deathCam.events.ex2 = true;
+          spawnExplosion(bomberGroup.localToWorld(deathCam.engineR.clone()), 0.6);
+        }
+        if (t > 6.2) {
+          // Wing tanks go up
+          deathCam.exploded = true;
+          const c = bomberGroup.localToWorld(deathCam.center0.clone());
+          spawnExplosion(c, 2.8);
+          spawnExplosion(bomberGroup.localToWorld(deathCam.engineL.clone()), 1.6);
+          sound.playExplosion(1.6);
+          bomberGroup.visible = false;
+          deathCam.wreckPoint = c;
+        }
+      }
+
+      // --- The victorious fighter holds formation on us, then peels away ---
+      const a = deathCam.actor;
+      const peel = Math.max(0, t - 4.2);
+      const ap = deathCam.actorStart.clone().add(new THREE.Vector3(
+        deathCam.side * (1.2 * t + 3.0 * peel * peel),
+        deathCam.disp.y * (peel > 0 ? 0.9 - Math.min(0.9, peel * 0.35) : 0.9) + 1.5 * peel * peel,
+        deathCam.disp.z + 2.0 * peel * peel
+      ));
+      a.group.position.copy(ap);
+      a.group.lookAt(ap.clone().add(new THREE.Vector3(deathCam.side * (0.3 + peel * 0.8), 0.15 + peel * 0.3, -10)));
+      a.group.rotateZ(-deathCam.side * (0.12 + Math.min(0.9, peel * 0.5)) + Math.sin(t * 2.1) * 0.03);
+      a.propBlade.rotation.z += 38 * dt;
+
+      // --- Chase camera rides above/behind the fighter's shoulder and stays locked on the falling bomber;
+      //     the fighter sits low in frame, then peels away out of shot ---
+      const focus = deathCam.exploded ? deathCam.wreckPoint : bomberGroup.localToWorld(deathCam.center0.clone());
+      const desiredCam = focus.clone().add(deathCam.camOffset);
+      deathCam.camPos.lerp(desiredCam, 1 - Math.exp(-2.5 * dt));
+      camera.position.copy(deathCam.camPos);
+      const fighterWeight = Math.max(0, 0.25 - peel * 0.12);
+      camera.lookAt(focus.clone().multiplyScalar(1 - fighterWeight).add(ap.clone().multiplyScalar(fighterWeight)));
+
+      if (t > 8.6 && deathCam.phase === 'cam') {
+        deathCam.phase = 'done';
         triggerGameOver();
       }
+    }
+
+    function resetDeathCam() {
+      deathCam.active = false;
+      deathCam.phase = 'impact';
+      if (deathCam.actor) {
+        scene.remove(deathCam.actor.group);
+        deathCam.actor = null;
+      }
+      document.body.classList.remove('killcam');
+      impactFlashEl.style.opacity = '0';
+      bomberGroup.visible = true;
+      bomberGroup.position.set(0, 0, 0);
+      bomberGroup.rotation.set(0, 0, 0);
+      camera.position.set(0, 0.65, 0);
+      camera.lookAt(cameraTarget);
+      state.lastAttacker = null;
     }
 
     // ============================================================================
@@ -2071,22 +2338,27 @@
     function animate(now) {
       requestAnimationFrame(animate);
 
-      const dt = Math.min(0.05, (now - lastTime) / 1000);
+      // Clamp: never negative (the first rAF timestamp can predate lastTime) and at most 50 ms per frame
+      const dt = THREE.MathUtils.clamp((now - lastTime) / 1000 || 0, 0, 0.05);
       lastTime = now;
 
       // 1. High-altitude B-17 airframe vibration & turbulence sway
       const timeSec = now * 0.001;
-      bomberGroup.position.y = Math.sin(timeSec * 1.8) * 0.04 + Math.sin(timeSec * 17) * 0.004;
-      bomberGroup.rotation.z = Math.sin(timeSec * 1.1) * 0.008;
+      if (deathCam.active) {
+        updateDeathCam(dt);
+      } else {
+        bomberGroup.position.y = Math.sin(timeSec * 1.8) * 0.04 + Math.sin(timeSec * 17) * 0.004;
+        bomberGroup.rotation.z = Math.sin(timeSec * 1.1) * 0.008;
 
-      // Smoothly orient camera & twin .50-cal mount toward player reticle
-      const desiredLook = new THREE.Vector3(
-        Math.sin(state.turretYaw) * 120,
-        0.65 + Math.sin(state.turretPitch) * 90,
-        Math.cos(state.turretYaw) * 120
-      );
-      cameraTarget.lerp(desiredLook, 10 * dt);
-      camera.lookAt(cameraTarget);
+        // Smoothly orient camera & twin .50-cal mount toward player reticle
+        const desiredLook = new THREE.Vector3(
+          Math.sin(state.turretYaw) * 120,
+          0.65 + Math.sin(state.turretPitch) * 90,
+          Math.cos(state.turretYaw) * 120
+        );
+        cameraTarget.lerp(desiredLook, 10 * dt);
+        camera.lookAt(cameraTarget);
+      }
 
       // Point the twin M2 Brownings directly at the 3D aim point
       raycaster.setFromCamera(state.pointerNDC, camera);
@@ -2130,7 +2402,7 @@
 
       // Contrail streamers
       state.contrailTimer -= dt;
-      if (state.contrailTimer <= 0) {
+      if (state.contrailTimer <= 0 && !deathCam.active) {
         spawnContrailPuffs();
         state.contrailTimer = 0.08;
       }
@@ -2291,6 +2563,7 @@
             scene.add(eTracer);
 
             enemyBullets.push({
+              owner: f,
               mesh: eTracer,
               vel: bulletDir.multiplyScalar(290),
               age: 0,
@@ -2354,6 +2627,7 @@
         const closest = segStart.addScaledVector(seg, segT);
         if (closest.z <= 2.5 && closest.z >= -4.0) {
           if (closest.length() < 4.2) {
+            state.lastAttacker = eb.owner || state.lastAttacker;
             triggerDamageFlash(5 + Math.floor(Math.random() * 4));
             sound.playExplosion(0.35);
             scene.remove(eb.mesh);
@@ -2387,8 +2661,8 @@
         const s = smokeParticles[i];
         s.age += dt;
         s.mesh.position.z += 35 * dt;
-        s.mesh.scale.addScalar(s.growRate * s.r * dt);
-        s.mat.opacity = Math.max(0, (1 - s.age / s.maxAge) * 0.65);
+        s.mesh.scale.addScalar(s.growRate * s.r * 0.6 * dt);
+        s.mat.opacity = Math.max(0, (1 - s.age / s.maxAge) * (s.baseOpacity || 0.65));
         if (s.age >= s.maxAge) {
           scene.remove(s.mesh);
           s.mat.dispose();
