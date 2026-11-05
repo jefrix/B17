@@ -172,6 +172,19 @@
     #station-picker button .t { display: block; font-family: 'Chakra Petch', sans-serif; font-weight: 700; font-size: 14px; letter-spacing: 0.06em; color: #fef3c7; }
     #station-picker button .d { display: block; font-size: 10px; color: rgba(209,250,229,0.7); margin-top: 2px; line-height: 1.3; }
     #station-picker button.sel { border-color: #f59e0b; background: rgba(120,53,15,0.45); box-shadow: 0 0 0 1px rgba(245,158,11,0.5) inset; }
+    #difficulty-picker { margin-bottom: 14px; text-align: left; }
+    #difficulty-picker .sp-label { font-size: 10px; letter-spacing: 0.25em; color: #fcd34d; margin-bottom: 6px; text-transform: uppercase; }
+    #difficulty-picker .dp-row { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; }
+    #difficulty-picker button { background: rgba(0,0,0,0.45); border: 1px solid rgba(110,231,183,0.3); border-radius: 9px; padding: 6px 9px;
+      cursor: pointer; color: #fef3c7; font-family: 'Chakra Petch', sans-serif; font-weight: 700; font-size: 13px; letter-spacing: 0.08em; text-align: center; }
+    #difficulty-picker button span { display: block; font-family: 'Share Tech Mono', monospace; font-weight: 400; font-size: 10px; letter-spacing: 0; color: rgba(209,250,229,0.7); margin-top: 1px; }
+    #difficulty-picker button.sel { border-color: #f59e0b; background: rgba(120,53,15,0.45); box-shadow: 0 0 0 1px rgba(245,158,11,0.5) inset; }
+    @media (max-height: 520px) { #difficulty-picker button span { display: none; } #difficulty-picker { margin-bottom: 8px; } }
+    /* Short screens: keep the start button pinned to the bottom of the briefing while the rest scrolls */
+    @media (max-height: 760px) {
+      #modal-actions { position: sticky; bottom: -14px; z-index: 2; padding: 10px 0 12px; margin: 0 -4px;
+        background: linear-gradient(to bottom, rgba(10,17,14,0), rgba(10,17,14,0.96) 30%); }
+    }
     @media (max-height: 520px) { #station-picker button .d { display: none; } #station-picker { margin-bottom: 8px; } }
     @media (max-height: 860px) { #brief-cards { display: none !important; } }
     #brief-cards { grid-template-columns: 1fr 1fr; }
@@ -549,6 +562,16 @@
         </div>
       </div>
 
+      <!-- Difficulty setting -->
+      <div id="difficulty-picker">
+        <div class="sp-label">Difficulty</div>
+        <div class="dp-row">
+          <button type="button" data-set="easy">EASY<span>Gentler fighters, more repairs</span></button>
+          <button type="button" data-set="normal">NORMAL<span>The standard game</span></button>
+          <button type="button" data-set="hard">HARD<span>Sharper, deadlier fighters</span></button>
+        </div>
+      </div>
+
       <!-- Tactical Briefing Cards -->
       <div id="brief-cards" class="grid grid-cols-1 sm:grid-cols-3 gap-2.5 text-left mb-5 text-xs">
         <div class="bg-black/45 p-3 rounded-lg border border-emerald-500/25">
@@ -586,7 +609,7 @@
         </div>
       </div>
 
-      <div class="flex flex-col sm:flex-row gap-3 justify-center">
+      <div id="modal-actions" class="flex flex-col sm:flex-row gap-3 justify-center">
         <button id="btn-start-mission" type="button" class="w-full sm:w-auto px-8 py-3.5 rounded-xl bg-gradient-to-r from-amber-500 to-orange-600 hover:from-amber-400 hover:to-orange-500 text-slate-950 font-military font-bold text-lg tracking-wider uppercase shadow-lg shadow-amber-500/25 active:scale-98 transition cursor-pointer">
           MAN THE TAIL TURRET
         </button>
@@ -2607,16 +2630,39 @@
     //   repairBetweenWaves: airframe % your crew patches between waves; wingmanRepairBetweenWaves: fraction
     //   extraFighters: added to every wave; maxSimultaneous: fighters in the air at once; fighterHpBonus: extra .50-cal hits to down one
     const DIFFICULTY_TIERS = [
-      { label: 'Easy',      enemyHitDamage: [3, 5], wingmanHitDamage: [3, 5], enemySpreadBase: 6.0, enemySpreadPerUnit: 0.012, enemyFireCooldownMin: 0.80, repairBetweenWaves: 15, wingmanRepairBetweenWaves: 0.10, extraFighters: 0, maxSimultaneous: 5, fighterHpBonus: 0 },
-      { label: 'Moderate',  enemyHitDamage: [3, 6], wingmanHitDamage: [3, 6], enemySpreadBase: 5.0, enemySpreadPerUnit: 0.010, enemyFireCooldownMin: 0.72, repairBetweenWaves: 12, wingmanRepairBetweenWaves: 0.08, extraFighters: 1, maxSimultaneous: 5, fighterHpBonus: 0 },
-      { label: 'Tough',     enemyHitDamage: [4, 6], wingmanHitDamage: [4, 6], enemySpreadBase: 4.2, enemySpreadPerUnit: 0.009, enemyFireCooldownMin: 0.65, repairBetweenWaves: 10, wingmanRepairBetweenWaves: 0.07, extraFighters: 2, maxSimultaneous: 6, fighterHpBonus: 1 },
-      { label: 'Hard',      enemyHitDamage: [4, 7], wingmanHitDamage: [4, 7], enemySpreadBase: 3.6, enemySpreadPerUnit: 0.008, enemyFireCooldownMin: 0.58, repairBetweenWaves: 8,  wingmanRepairBetweenWaves: 0.05, extraFighters: 3, maxSimultaneous: 6, fighterHpBonus: 1 },
-      { label: 'Very hard', enemyHitDamage: [5, 8], wingmanHitDamage: [5, 8], enemySpreadBase: 3.0, enemySpreadPerUnit: 0.007, enemyFireCooldownMin: 0.52, repairBetweenWaves: 6,  wingmanRepairBetweenWaves: 0.04, extraFighters: 4, maxSimultaneous: 7, fighterHpBonus: 2 },
-      { label: 'Ace',       enemyHitDamage: [6, 9], wingmanHitDamage: [6, 9], enemySpreadBase: 2.5, enemySpreadPerUnit: 0.006, enemyFireCooldownMin: 0.45, repairBetweenWaves: 5,  wingmanRepairBetweenWaves: 0.03, extraFighters: 5, maxSimultaneous: 7, fighterHpBonus: 2 }
+      { label: 'Green',     enemyHitDamage: [3, 5], wingmanHitDamage: [3, 5], enemySpreadBase: 6.0, enemySpreadPerUnit: 0.012, enemyFireCooldownMin: 0.80, repairBetweenWaves: 15, wingmanRepairBetweenWaves: 0.10, extraFighters: 0, maxSimultaneous: 5, fighterHpBonus: 0 },
+      { label: 'Seasoned',  enemyHitDamage: [3, 6], wingmanHitDamage: [3, 6], enemySpreadBase: 5.0, enemySpreadPerUnit: 0.010, enemyFireCooldownMin: 0.72, repairBetweenWaves: 12, wingmanRepairBetweenWaves: 0.08, extraFighters: 1, maxSimultaneous: 5, fighterHpBonus: 0 },
+      { label: 'Veteran',   enemyHitDamage: [4, 6], wingmanHitDamage: [4, 6], enemySpreadBase: 4.2, enemySpreadPerUnit: 0.009, enemyFireCooldownMin: 0.65, repairBetweenWaves: 10, wingmanRepairBetweenWaves: 0.07, extraFighters: 2, maxSimultaneous: 6, fighterHpBonus: 1 },
+      { label: 'Hardened',  enemyHitDamage: [4, 7], wingmanHitDamage: [4, 7], enemySpreadBase: 3.6, enemySpreadPerUnit: 0.008, enemyFireCooldownMin: 0.58, repairBetweenWaves: 8,  wingmanRepairBetweenWaves: 0.05, extraFighters: 3, maxSimultaneous: 6, fighterHpBonus: 1 },
+      { label: 'Experten',  enemyHitDamage: [5, 8], wingmanHitDamage: [5, 8], enemySpreadBase: 3.0, enemySpreadPerUnit: 0.007, enemyFireCooldownMin: 0.52, repairBetweenWaves: 6,  wingmanRepairBetweenWaves: 0.04, extraFighters: 4, maxSimultaneous: 7, fighterHpBonus: 2 },
+      { label: 'Aces',      enemyHitDamage: [6, 9], wingmanHitDamage: [6, 9], enemySpreadBase: 2.5, enemySpreadPerUnit: 0.006, enemyFireCooldownMin: 0.45, repairBetweenWaves: 5,  wingmanRepairBetweenWaves: 0.03, extraFighters: 5, maxSimultaneous: 7, fighterHpBonus: 2 }
     ];
     const DIFFICULTY = { ...DIFFICULTY_TIERS[0] };
-    // Global trim on enemy cannon damage at every rank (0.93 = 7% less than the tier tables above)
-    const ENEMY_DAMAGE_SCALE = 0.93;
+    // Player-chosen difficulty, applied on top of the rank tier.
+    //   damage: multiplier on enemy cannon damage (Normal 0.93 = the tuned default)
+    //   spread: multiplier on fighter aim scatter (bigger = they miss more)
+    //   repair: multiplier on between-wave repairs
+    //   fighters: added to every wave;  wind: bombsight crosswind multiplier
+    const DIFFICULTY_SETTINGS = {
+      easy:   { label: 'Easy',   damage: 0.70, spread: 1.30, repair: 1.40, fighters: -1, wind: 0.6 },
+      normal: { label: 'Normal', damage: 0.93, spread: 1.00, repair: 1.00, fighters:  0, wind: 1.0 },
+      hard:   { label: 'Hard',   damage: 1.15, spread: 0.80, repair: 0.65, fighters:  1, wind: 1.3 }
+    };
+    let ENEMY_DAMAGE_SCALE = DIFFICULTY_SETTINGS.normal.damage;
+
+    // Rank tier + chosen setting -> the numbers the game actually uses this mission
+    function applyDifficulty() {
+      const tier = DIFFICULTY_TIERS[state.tier || 0];
+      const set = DIFFICULTY_SETTINGS[career.setting] || DIFFICULTY_SETTINGS.normal;
+      Object.assign(DIFFICULTY, tier);
+      DIFFICULTY.enemySpreadBase = tier.enemySpreadBase * set.spread;
+      DIFFICULTY.enemySpreadPerUnit = tier.enemySpreadPerUnit * set.spread;
+      DIFFICULTY.repairBetweenWaves = Math.min(30, tier.repairBetweenWaves * set.repair);
+      DIFFICULTY.wingmanRepairBetweenWaves = Math.min(0.2, tier.wingmanRepairBetweenWaves * set.repair);
+      DIFFICULTY.extraFighters = tier.extraFighters + set.fighters;
+      DIFFICULTY.windScale = set.wind;
+      ENEMY_DAMAGE_SCALE = set.damage;
+    }
 
     // Promotion every 2 successful missions
     const MISSIONS_PER_PROMOTION = 2;
@@ -2670,7 +2716,7 @@
       const r = Math.random();
       const weather = r < 0.3 ? 'clear' : r < 0.65 ? 'scattered' : 'broken';
       state.tier = rankIndexFor(career.completed);
-      Object.assign(DIFFICULTY, DIFFICULTY_TIERS[state.tier]);
+      applyDifficulty();
       state.mission = { ...m, number: career.completed + 1, weather };
       applyWeather(weather);
     }
@@ -2700,7 +2746,7 @@
 
     function promotionStatus(completed) {
       const ri = rankIndexFor(completed);
-      if (ri >= RANKS.length - 1) return 'Highest rank — every mission now is flown at Ace difficulty.';
+      if (ri >= RANKS.length - 1) return 'Highest rank — from here on you face the Luftwaffe\'s aces.';
       const left = (ri + 1) * MISSIONS_PER_PROMOTION - completed;
       return `Promotion to ${RANKS[ri + 1].name} after ${left} more successful mission${left === 1 ? '' : 's'}.`;
     }
@@ -2719,9 +2765,11 @@
       document.getElementById('career-rank').textContent = rank.name;
       document.getElementById('career-meta').innerHTML =
         `Missions completed: <strong>${career.completed}</strong> &middot; Career kills: <strong>${career.kills}</strong><br>` +
-        `Difficulty: <strong>${DIFFICULTY.label}</strong> &middot; ${promotionStatus(career.completed)}`;
+        `Luftwaffe pilots: <strong>${DIFFICULTY_TIERS[state.tier].label}</strong> (toughens with rank) &middot; ${promotionStatus(career.completed)}`;
       document.getElementById('career-panel').style.display = '';
       document.getElementById('station-picker').style.display = '';
+      document.getElementById('difficulty-picker').style.display = '';
+      refreshDifficultyPicker();
       refreshStationPicker();
       document.getElementById('brief-cards').style.display = '';
       modalStatsEl.classList.add('hidden');
@@ -2749,6 +2797,16 @@
           `${STATION_BRIEF[cur]}. Hold off ${TOTAL_WAVES} waves: 3 on the run in, 1 over the target and 3 on the way home.`;
       }
     }
+    function refreshDifficultyPicker() {
+      const cur = career.setting || 'normal';
+      document.querySelectorAll('#difficulty-picker button').forEach(b => b.classList.toggle('sel', b.dataset.set === cur));
+    }
+    document.querySelectorAll('#difficulty-picker button').forEach(b => b.addEventListener('click', () => {
+      career.setting = b.dataset.set;
+      saveCareer();
+      applyDifficulty();
+      refreshDifficultyPicker();
+    }));
     document.querySelectorAll('#station-picker button').forEach(b => b.addEventListener('click', () => {
       career.station = b.dataset.st;
       saveCareer();
@@ -3254,7 +3312,7 @@
       const losses = d.lost.length ? d.lost.join(' & ') : 'None';
       const promo = d.promoted
         ? `<div class="db-promo">${insigniaSVG(d.rank.insignia, 46)}<div><div class="big">Promoted to ${d.rank.name}!</div>
-             <div class="small">The next missions will be tougher: ${DIFFICULTY_TIERS[rankIndexFor(d.completed)].label} difficulty.</div></div></div>`
+             <div class="small">The next missions will be tougher: ${DIFFICULTY_TIERS[rankIndexFor(d.completed)].label.toLowerCase()} Luftwaffe pilots.</div></div></div>`
         : `<div class="db-promo quiet">${insigniaSVG(d.rank.insignia, 40)}<div><div class="db-rank">${d.rank.name}</div>
              <div class="small">${promotionStatus(d.completed)}</div></div></div>`;
       debriefEl.innerHTML = `
@@ -3505,7 +3563,7 @@
         // Start the run with the target ahead and off to one side; a crosswind keeps pushing us off
         const side = Math.random() < 0.5 ? -1 : 1;
         bsight.group.position.set(side * (60 + Math.random() * 110), 0, -BS_SPEED * BS_RUN);
-        bsight.wind = (Math.random() < 0.5 ? -1 : 1) * (5 + Math.random() * 9);
+        bsight.wind = (Math.random() < 0.5 ? -1 : 1) * (5 + Math.random() * 9) * (DIFFICULTY.windScale || 1);
         bsight.t = 0; bsight.dropped = false; bsight.armed = false; bsight.ending = false; bsight.onDone = onDone;
         bsight.bombs.forEach(b => bsight.scene.remove(b)); bsight.bombs = [];
         bsight.flak.forEach(f => bsight.scene.remove(f.sprite)); bsight.flak = [];
@@ -3927,6 +3985,7 @@
       enemyBullets.forEach(b => scene.remove(b.mesh));
       enemyBullets.length = 0;
       resetDeathCam();
+      applyDifficulty();
       applyStation(career.station || 'tail');
       clearBulletHoles();
       resetWingmen();
@@ -3936,7 +3995,7 @@
       state.kills = 0;
       state.stats = { hitsTaken: 0, damageTaken: 0, squadHits: 0, squadDamage: 0, friendlyHits: 0, playerHits: 0 };
       document.getElementById('hud-mission-line').textContent =
-        `${RANKS[state.tier].short} // MISSION ${state.mission.number}: ${state.mission.name.toUpperCase()} // ${WEATHER[state.mission.weather].label.toUpperCase()}`;
+        `${RANKS[state.tier].short} // MISSION ${state.mission.number}: ${state.mission.name.toUpperCase()} // ${WEATHER[state.mission.weather].label.toUpperCase()} // ${(DIFFICULTY_SETTINGS[career.setting] || DIFFICULTY_SETTINGS.normal).label.toUpperCase()}`;
       state.shotsFired = 0;
       state.health = 100;
       state.heat = 0;
@@ -3965,6 +4024,7 @@
       document.getElementById('modal-kicker').textContent = `381st Bomb Group // Mission ${state.mission.number} — ${state.mission.name}`;
       document.getElementById('career-panel').style.display = 'none';
       document.getElementById('station-picker').style.display = 'none';
+      document.getElementById('difficulty-picker').style.display = 'none';
       document.getElementById('brief-cards').style.display = 'none';
       modalTitleEl.textContent = 'MISSION FAILED';
       const where = { ingress: `on the run in to ${state.mission.name}`, target: `over ${state.mission.name}`, egress: 'on the way home' }[missionPhase()];
