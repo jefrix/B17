@@ -125,6 +125,57 @@
       color: #f0fdf4; letter-spacing: 0.06em; text-transform: uppercase; margin-top: 2px; }
     body.killcam #radio-box { display: none; }
 
+    /* ---------- Norden bombsight ---------- */
+    #bombsight-ui { position: fixed; inset: 0; z-index: 30; pointer-events: none; display: none; font-family: 'Share Tech Mono', monospace; }
+    body.bombsight #bombsight-ui { display: block; }
+    body.bombsight #hud-root, body.bombsight #crosshair-container, body.bombsight .turret-vignette, body.bombsight .plexiglass-glare,
+    body.bombsight #station-frame, body.bombsight #glass-damage, body.bombsight #damage-overlay { display: none !important; }
+    .bs-mask { position: absolute; inset: 0;
+      background: radial-gradient(circle at 50% 50%, rgba(0,0,0,0) 0, rgba(0,0,0,0) 42vmin, rgba(3,5,6,0.9) 45vmin, #020304 52vmin); }
+    .bs-reticle { position: absolute; left: 50%; top: 50%; width: 90vmin; height: 90vmin; transform: translate(-50%, -50%); }
+    .bs-panel { position: absolute; color: #cfe8d6; font-size: 12px; letter-spacing: 0.08em; text-transform: uppercase; line-height: 1.6;
+      text-shadow: 0 1px 3px #000; }
+    .bs-panel b { color: #fcd34d; font-weight: 400; }
+    .bs-top { top: max(14px, env(safe-area-inset-top)); left: 50%; transform: translateX(-50%); color: #fcd34d; letter-spacing: 0.3em; font-size: 11px; white-space: nowrap; }
+    .bs-left { left: max(16px, env(safe-area-inset-left)); top: 50%; transform: translateY(-50%); }
+    .bs-steer { position: absolute; left: 50%; bottom: max(64px, calc(env(safe-area-inset-bottom) + 64px)); transform: translateX(-50%);
+      width: min(320px, 60vw); height: 10px; border: 1px solid rgba(207,232,214,0.5); border-radius: 5px; }
+    .bs-steer::after { content: ''; position: absolute; left: 50%; top: -4px; width: 1px; height: 18px; background: rgba(207,232,214,0.6); }
+    #bs-steer-mark { position: absolute; top: 1px; width: 14px; height: 6px; margin-left: -7px; left: 50%; background: #fcd34d; border-radius: 3px; }
+    .bs-hint { bottom: max(18px, env(safe-area-inset-bottom)); left: 50%; transform: translateX(-50%); text-align: center; font-size: 11px; width: min(640px, 92vw); }
+    #bs-away { position: absolute; left: 50%; top: 30%; transform: translateX(-50%); font-family: 'Chakra Petch', sans-serif; font-weight: 700;
+      font-size: clamp(26px, 5vw, 52px); color: #fde68a; letter-spacing: 0.12em; text-shadow: 0 4px 16px #000; opacity: 0; transition: opacity 0.3s; }
+    #bs-away.show { opacity: 1; }
+    body.touch-mode .bs-hint .desk { display: none; }
+    body:not(.touch-mode) .bs-hint .touch { display: none; }
+    @media (max-width: 700px) { .bs-left { top: auto; bottom: 96px; transform: none; font-size: 10px; } }
+
+    /* Takeoff "skip" hint */
+    #cine-hint { position: fixed; left: 50%; bottom: max(18px, env(safe-area-inset-bottom)); transform: translateX(-50%); z-index: 43;
+      color: rgba(255,255,255,0.75); font-size: 11px; letter-spacing: 0.25em; text-transform: uppercase; display: none; pointer-events: none;
+      text-shadow: 0 1px 4px #000; }
+    #cine-hint.show { display: block; }
+
+    /* ---------- Gun stations ---------- */
+    #station-frame { position: fixed; inset: 0; pointer-events: none; z-index: 11; }
+    body.station-ball .turret-vignette {
+      background: radial-gradient(circle at 50% 50%, rgba(0,0,0,0) 0, rgba(0,0,0,0) 52vmin, rgba(6,9,11,0.88) 60vmin, #05080a 72vmin);
+      box-shadow: none; }
+    body.station-top .turret-vignette {
+      background: radial-gradient(ellipse at 50% 30%, rgba(12,22,30,0) 58%, rgba(8,14,18,0.45) 82%, rgba(4,8,10,0.85) 100%); }
+    body.killcam #station-frame, body.landing #station-frame { display: none; }
+    #station-picker { margin-bottom: 14px; text-align: left; }
+    #station-picker .sp-label { font-size: 10px; letter-spacing: 0.25em; color: #fcd34d; margin-bottom: 6px; text-transform: uppercase; }
+    #station-picker .sp-row { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; }
+    #station-picker button { background: rgba(0,0,0,0.45); border: 1px solid rgba(110,231,183,0.3); border-radius: 9px; padding: 8px 9px;
+      text-align: left; cursor: pointer; color: #d1fae5; font-family: inherit; }
+    #station-picker button .t { display: block; font-family: 'Chakra Petch', sans-serif; font-weight: 700; font-size: 14px; letter-spacing: 0.06em; color: #fef3c7; }
+    #station-picker button .d { display: block; font-size: 10px; color: rgba(209,250,229,0.7); margin-top: 2px; line-height: 1.3; }
+    #station-picker button.sel { border-color: #f59e0b; background: rgba(120,53,15,0.45); box-shadow: 0 0 0 1px rgba(245,158,11,0.5) inset; }
+    @media (max-height: 520px) { #station-picker button .d { display: none; } #station-picker { margin-bottom: 8px; } }
+    @media (max-height: 860px) { #brief-cards { display: none !important; } }
+    #brief-cards { grid-template-columns: 1fr 1fr; }
+
     /* ---------- Career / briefing / debrief ---------- */
     #career-panel { display: flex; gap: 12px; align-items: center; text-align: left; background: rgba(0,0,0,0.45);
       border: 1px solid rgba(252,211,77,0.35); border-radius: 10px; padding: 10px 12px; margin-bottom: 14px; color: #d1fae5; }
@@ -249,6 +300,7 @@
   <div class="plexiglass-glare"></div>
   <div class="turret-vignette"></div>
   <div id="damage-overlay" class="damage-flash"></div>
+  <div id="station-frame"></div>
   <div id="glass-damage"></div>
   <div id="impact-flash"></div>
 
@@ -315,7 +367,7 @@
         <div>
           <div id="hud-mission-line" class="text-[10px] uppercase tracking-widest text-emerald-400/80">381st BG // B-17G "IRON MAIDEN"</div>
           <div class="font-military text-lg sm:text-xl font-bold text-amber-400 tracking-wide flex items-center gap-2">
-            <span>CHEYENNE TAIL TURRET</span>
+            <span id="hud-station-title">CHEYENNE TAIL TURRET</span>
             <span id="wave-badge" class="text-xs bg-amber-500/20 border border-amber-400/50 text-amber-300 px-2 py-0.5 rounded">WAVE 1</span>
           </div>
           <!-- Live GLB Asset Pipeline Badges -->
@@ -389,7 +441,7 @@
         </div>
         <div class="flex justify-between text-[11px] text-emerald-300/75 mt-2">
           <span>SQUADRON STATUS</span>
-          <span id="hud-turret-wrap">TAIL TURRET: <strong id="hud-turret-deg" class="text-amber-300">AZ 0° EL 0°</strong></span>
+          <span id="hud-turret-wrap">TURRET: <strong id="hud-turret-deg" class="text-amber-300">AZ 0° EL 0°</strong></span>
         </div>
         <!-- inline styles: hud.css is pre-built, so no new Tailwind classes here -->
         <div style="font-size:11px; margin-top:2px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;">
@@ -402,8 +454,8 @@
         <div class="hud-panel px-4 py-2 rounded-full flex items-center gap-3 border border-emerald-500/40">
           <canvas id="radar-canvas" width="76" height="76" class="rounded-full bg-black/80 border border-emerald-400/50"></canvas>
           <div class="text-xs leading-tight">
-            <div class="text-emerald-400 font-bold">AN/APS-13 TAIL WARNING</div>
-            <div class="text-[11px] text-emerald-200/70">REAR HEMISPHERE SCAN</div>
+            <div id="radar-title" class="text-emerald-400 font-bold">AN/APS-13 TAIL WARNING</div>
+            <div id="radar-sub" class="text-[11px] text-emerald-200/70">REAR HEMISPHERE SCAN</div>
             <div id="radar-closest" class="text-[11px] text-amber-300 font-bold mt-0.5">SECTOR CLEAR</div>
           </div>
         </div>
@@ -427,6 +479,31 @@
     </div>
   </div>
 
+  <!-- Norden bombsight overlay (bomb run) -->
+  <div id="bombsight-ui">
+    <div class="bs-mask"></div>
+    <svg class="bs-reticle" viewBox="-50 -50 100 100" aria-hidden="true">
+      <g stroke="rgba(220,240,225,0.85)" stroke-width="0.18" fill="none">
+        <line x1="-42" y1="0" x2="-2" y2="0"/><line x1="2" y1="0" x2="42" y2="0"/>
+        <line x1="0" y1="-42" x2="0" y2="-2"/><line x1="0" y1="2" x2="0" y2="42"/>
+        <circle r="0.6"/>
+        <line x1="-1.2" y1="-10" x2="1.2" y2="-10"/><line x1="-1.2" y1="-20" x2="1.2" y2="-20"/><line x1="-1.2" y1="-30" x2="1.2" y2="-30"/>
+        <line x1="-1.2" y1="10" x2="1.2" y2="10"/><line x1="-1.2" y1="20" x2="1.2" y2="20"/>
+        <line x1="-10" y1="-1.2" x2="-10" y2="1.2"/><line x1="10" y1="-1.2" x2="10" y2="1.2"/>
+        <line x1="-20" y1="-1.2" x2="-20" y2="1.2"/><line x1="20" y1="-1.2" x2="20" y2="1.2"/>
+      </g>
+    </svg>
+    <div class="bs-panel bs-top">NORDEN M-9 BOMBSIGHT // BOMBARDIER</div>
+    <div class="bs-panel bs-left">TARGET <b id="bs-target">—</b><br>RANGE <b id="bs-range">3.0 MI</b><br>DRIFT <b id="bs-drift">—</b><br>ALT <b>24,500 FT</b></div>
+    <div class="bs-steer"><div id="bs-steer-mark"></div></div>
+    <div class="bs-panel bs-hint">
+      <span class="desk">Steer: move the mouse left / right (or A / D) &middot; Release: click or SPACE when the target is under the crosshair</span>
+      <span class="touch">Drag left / right to steer &middot; tap DROP when the target is under the crosshair</span>
+    </div>
+    <div id="bs-away">BOMBS AWAY!</div>
+  </div>
+  <div id="cine-hint">Click, tap or press Space to skip</div>
+
   <!-- Fade-to-black between combat and the landing scene -->
   <div id="fade-overlay"></div>
 
@@ -449,7 +526,7 @@
       <p id="modal-desc" class="text-xs sm:text-sm text-emerald-100/85 leading-relaxed mb-5">
         Stationed in the Cheyenne tail turret of a Boeing B-17G Flying Fortress at 24,500 feet. 
         Luftwaffe <strong class="text-amber-300">Messerschmitt Bf 109G</strong> and <strong class="text-amber-300">Focke-Wulf Fw 190A</strong> interceptors are diving through the flak screen on high-speed pursuit curves.
-        Survive <strong class="text-amber-300">9 waves</strong>: 4 on the run in, 1 over the target, and 4 on the long way home.
+        Survive <strong class="text-amber-300">7 waves</strong>: 3 on the run in, 1 over the target, and 3 on the way home.
       </p>
 
       <!-- Career: rank, record, next promotion -->
@@ -462,6 +539,16 @@
         <button id="btn-reset-career" type="button">Reset career</button>
       </div>
 
+      <!-- Gun station picker -->
+      <div id="station-picker">
+        <div class="sp-label">Your station</div>
+        <div class="sp-row">
+          <button type="button" data-st="tail"><span class="t">TAIL GUN</span><span class="d">Facing aft. Fighters attack from behind.</span></button>
+          <button type="button" data-st="top"><span class="t">TOP TURRET</span><span class="d">Facing forward over the nose. Head-on attacks from 12 o'clock high.</span></button>
+          <button type="button" data-st="ball"><span class="t">BALL TURRET</span><span class="d">Under the belly. Attacks from low behind, the formation above you.</span></button>
+        </div>
+      </div>
+
       <!-- Tactical Briefing Cards -->
       <div id="brief-cards" class="grid grid-cols-1 sm:grid-cols-3 gap-2.5 text-left mb-5 text-xs">
         <div class="bg-black/45 p-3 rounded-lg border border-emerald-500/25">
@@ -472,7 +559,7 @@
           <div class="text-amber-400 font-bold mb-1">2. FIRE DISCIPLINE</div>
           <p class="text-emerald-200/75 text-[11px]">Fire short bursts with your twin .50-cal M2 Brownings. Continuous firing warps the barrels and triggers a thermal lockout.</p>
         </div>
-        <div class="bg-black/45 p-3 rounded-lg border border-sky-500/35 desktop-only">
+        <div class="bg-black/45 p-3 rounded-lg border border-sky-500/35" style="display:none">
           <div class="text-sky-300 font-bold mb-1">3. SKETCHFAB .GLB READY</div>
           <p class="text-emerald-200/75 text-[11px]">Auto-loads <code class="text-amber-300">./assets/b17.glb</code> &amp; <code class="text-amber-300">bf109.glb</code> or click <strong class="text-sky-300">LOAD .GLB MODELS</strong> / drag-and-drop your local files!</p>
         </div>
@@ -605,6 +692,122 @@
         }
       }
 
+      // Enemy round striking the airframe: dull thud, metallic clang and rattling debris
+      playHullHit() {
+        if (!this.ctx || this.muted) return;
+        const now = this.ctx.currentTime;
+        const thud = this.ctx.createOscillator(), tg = this.ctx.createGain();
+        thud.type = 'sine';
+        thud.frequency.setValueAtTime(110, now);
+        thud.frequency.exponentialRampToValueAtTime(42, now + 0.16);
+        tg.gain.setValueAtTime(0.42, now);
+        tg.gain.exponentialRampToValueAtTime(0.001, now + 0.2);
+        thud.connect(tg); tg.connect(this.ctx.destination);
+        thud.start(now); thud.stop(now + 0.22);
+
+        const clangBus = this.ctx.createGain(), bp = this.ctx.createBiquadFilter();
+        bp.type = 'bandpass'; bp.frequency.value = 1300; bp.Q.value = 2.2;
+        clangBus.gain.setValueAtTime(0.09, now);
+        clangBus.gain.exponentialRampToValueAtTime(0.001, now + 0.45);
+        clangBus.connect(bp); bp.connect(this.ctx.destination);
+        [310, 467, 733, 1090].forEach((f) => {
+          const o = this.ctx.createOscillator();
+          o.type = 'square';
+          o.frequency.value = f * (0.96 + Math.random() * 0.08);
+          o.connect(clangBus); o.start(now); o.stop(now + 0.47);
+        });
+
+        const n = this.ctx.createBufferSource(), hp = this.ctx.createBiquadFilter(), ng = this.ctx.createGain();
+        n.buffer = this.noiseBuffer;
+        hp.type = 'highpass'; hp.frequency.value = 2200;
+        ng.gain.setValueAtTime(0.0001, now);          // silent until the rattle starts
+        ng.gain.setValueAtTime(0.0001, now + 0.03);
+        ng.gain.exponentialRampToValueAtTime(0.09, now + 0.05);
+        ng.gain.exponentialRampToValueAtTime(0.001, now + 0.25);
+        n.connect(hp); hp.connect(ng); ng.connect(this.ctx.destination);
+        n.start(now, Math.random(), 0.3);
+      }
+
+      // Round punching through the turret glass: sharp crack, crunch and tinkling fragments
+      playGlassCrack() {
+        if (!this.ctx || this.muted) return;
+        const now = this.ctx.currentTime;
+        const crack = this.ctx.createBufferSource(), hp = this.ctx.createBiquadFilter(), cg = this.ctx.createGain();
+        crack.buffer = this.noiseBuffer;
+        hp.type = 'highpass'; hp.frequency.value = 3200;
+        cg.gain.setValueAtTime(0.45, now);
+        cg.gain.exponentialRampToValueAtTime(0.001, now + 0.06);
+        crack.connect(hp); hp.connect(cg); cg.connect(this.ctx.destination);
+        crack.start(now, Math.random(), 0.08);
+
+        const crunch = this.ctx.createBufferSource(), bp = this.ctx.createBiquadFilter(), rg = this.ctx.createGain();
+        crunch.buffer = this.noiseBuffer;
+        bp.type = 'bandpass'; bp.frequency.value = 5200; bp.Q.value = 0.8;
+        rg.gain.setValueAtTime(0.14, now + 0.01);
+        rg.gain.exponentialRampToValueAtTime(0.001, now + 0.22);
+        crunch.connect(bp); bp.connect(rg); rg.connect(this.ctx.destination);
+        crunch.start(now + 0.01, Math.random(), 0.24);
+
+        for (let i = 0; i < 6; i++) {
+          const t0 = now + 0.03 + Math.random() * 0.3;
+          const o = this.ctx.createOscillator(), g = this.ctx.createGain();
+          o.type = 'sine';
+          o.frequency.value = 2600 + Math.random() * 3800;
+          g.gain.setValueAtTime(0.0001, t0);
+          g.gain.exponentialRampToValueAtTime(0.05, t0 + 0.004);
+          g.gain.exponentialRampToValueAtTime(0.0001, t0 + 0.07);
+          o.connect(g); g.connect(this.ctx.destination);
+          o.start(t0); o.stop(t0 + 0.08);
+        }
+      }
+
+      // Fighter roaring past: engine note + air rush with a Doppler drop, panned across the stereo field
+      playFlyby(pan = 0, intensity = 1) {
+        if (!this.ctx || this.muted) return;
+        const now = this.ctx.currentTime;
+        const dur = 1.9;
+        const peak = 0.55;
+        const panner = this.ctx.createStereoPanner ? this.ctx.createStereoPanner() : null;
+        const out = this.ctx.createGain();
+        out.gain.setValueAtTime(0.0001, now);
+        out.gain.exponentialRampToValueAtTime(0.5 * intensity, now + peak);
+        out.gain.exponentialRampToValueAtTime(0.0001, now + dur);
+        if (panner) {
+          panner.pan.setValueAtTime(THREE.MathUtils.clamp(pan, -1, 1), now);
+          panner.pan.linearRampToValueAtTime(THREE.MathUtils.clamp(-pan * 0.7, -1, 1), now + dur);
+          out.connect(panner); panner.connect(this.ctx.destination);
+        } else {
+          out.connect(this.ctx.destination);
+        }
+
+        // Engine: two detuned saws through a lowpass, pitch drops as it passes
+        const f0 = 120 + Math.random() * 30;
+        const lp = this.ctx.createBiquadFilter();
+        lp.type = 'lowpass'; lp.frequency.value = 1100;
+        lp.connect(out);
+        [1, 1.5].forEach((mult) => {
+          const o = this.ctx.createOscillator();
+          o.type = 'sawtooth';
+          o.frequency.setValueAtTime(f0 * mult * 1.28, now);
+          o.frequency.setValueAtTime(f0 * mult * 1.2, now + peak - 0.15);
+          o.frequency.exponentialRampToValueAtTime(f0 * mult * 0.74, now + peak + 0.25);
+          const g = this.ctx.createGain();
+          g.gain.value = mult === 1 ? 0.6 : 0.25;
+          o.connect(g); g.connect(lp);
+          o.start(now); o.stop(now + dur + 0.05);
+        });
+
+        // Air rush
+        const n = this.ctx.createBufferSource(), bp = this.ctx.createBiquadFilter(), ng = this.ctx.createGain();
+        n.buffer = this.noiseBuffer;
+        bp.type = 'bandpass'; bp.Q.value = 0.9;
+        bp.frequency.setValueAtTime(2200, now);
+        bp.frequency.exponentialRampToValueAtTime(520, now + dur);
+        ng.gain.value = 0.9;
+        n.connect(bp); bp.connect(ng); ng.connect(out);
+        n.start(now, Math.random() * 0.5, dur);
+      }
+
       // Tyres touching the runway: two short rubber chirps
       playTouchdown() {
         if (!this.ctx || this.muted) return;
@@ -620,6 +823,18 @@
           g.gain.exponentialRampToValueAtTime(0.0001, now + 0.22);
           noise.connect(bp); bp.connect(g); g.connect(this.ctx.destination);
           noise.start(now, Math.random(), 0.25);
+        });
+      }
+
+      // Engines run up from idle to take-off power
+      spoolUp(sec = 6) {
+        if (!this.ctx || !this.droneOscs) return;
+        const now = this.ctx.currentTime;
+        const base = [54, 108.5];
+        this.droneOscs.forEach((o, i) => {
+          o.frequency.cancelScheduledValues(now);
+          o.frequency.setValueAtTime(base[i] * 0.55, now);
+          o.frequency.setTargetAtTime(base[i], now + 0.3, sec / 3);
         });
       }
 
@@ -1125,6 +1340,113 @@
     const muzzleLight = new THREE.PointLight(0xffaa00, 0, 12);
     muzzleLight.position.set(0, 0.25, 2.2);
     gunRecoilGroup.add(muzzleLight);
+
+    // ============================================================================
+    // 4b. GUN STATIONS — tail gun, Sperry top turret, Sperry ball turret
+    // ============================================================================
+    // eye: camera position in bomber space (tail turret is the origin; the bomber's nose points to -Z).
+    // baseYaw 0 = looking aft (+Z), PI = looking forward. Pitch in radians (+ up).
+    // wingmen: formation layout for this station so the other Fortresses sit in view.
+    // approach: where Luftwaffe attack runs come from.
+    const STATIONS = {
+      tail: { title: 'CHEYENNE TAIL TURRET', radar: ['AN/APS-13 TAIL WARNING', 'REAR HEMISPHERE SCAN'],
+              eye: new THREE.Vector3(0, 0.65, 0), baseYaw: 0, basePitch: 0, yawRange: 0.42, pitchRange: 0.30,
+              wingmen: [[-34, -9, 76], [40, 7, 96]], approach: 'rear', struts: true },
+      top:  { title: 'SPERRY TOP TURRET', radar: ['TOP TURRET SECTOR SCOPE', "12 O'CLOCK HIGH SCAN"],
+              eye: new THREE.Vector3(0, 0.06, -18.2), baseYaw: Math.PI, basePitch: 0.1, yawRange: 0.55, pitchRange: 0.38,
+              wingmen: [[-40, -15, -112], [46, -25, -140]], approach: 'front', struts: false },
+      ball: { title: 'SPERRY BALL TURRET', radar: ['BALL TURRET SECTOR SCOPE', "6 O'CLOCK LOW SCAN"],
+              eye: new THREE.Vector3(0, -3.25, -12.2), baseYaw: 0, basePitch: -0.12, yawRange: 0.55, pitchRange: 0.42,
+              wingmen: [[-36, 10, 70], [42, 17, 92]], approach: 'below', struts: false }
+    };
+    let station = STATIONS.tail;
+    const stationForward = new THREE.Vector3(0, 0, 1);   // flat facing direction of the current station
+    const stationRight = new THREE.Vector3(-1, 0, 0);    // screen-right in world space
+
+    // Turret frame parts were built around the tail eye point; re-centre them on the eye so they can move with the station
+    turretFrameGroup.children.forEach(c => { c.position.y -= 0.65; });
+    turretFrameGroup.rotation.order = 'YXZ';
+
+    // Measured on helijah's B-17: dome positions as fractions of the airframe's bounding box,
+    // so they stay right if the model is re-scaled
+    function locateTurretEyes() {
+      if (!playerGLBBomberMesh) return;
+      // Measure with the bomber at rest (it may still be displaced after a shoot-down)
+      const savedPos = bomberGroup.position.clone(), savedRot = bomberGroup.rotation.clone(), savedVis = bomberGroup.visible;
+      bomberGroup.position.set(0, 0, 0);
+      bomberGroup.rotation.set(0, 0, 0);
+      bomberGroup.updateMatrixWorld(true);
+      const box = new THREE.Box3().setFromObject(playerGLBBomberMesh);
+      bomberGroup.position.copy(savedPos);
+      bomberGroup.rotation.copy(savedRot);
+      bomberGroup.visible = savedVis;
+      bomberGroup.updateMatrixWorld(true);
+      const L = box.max.z - box.min.z;
+      STATIONS.top.eye.set(0, box.min.y + 5.12 * (L / 23.08), box.min.z + 0.227 * L);  // just above the dome
+      STATIONS.ball.eye.set(0, box.min.y + 1.34 * (L / 23.08), box.min.z + 0.487 * L);
+    }
+
+    function applyStation(id) {
+      locateTurretEyes();
+      station = STATIONS[id] || STATIONS.tail;
+      document.body.classList.remove('station-tail', 'station-top', 'station-ball');
+      document.body.classList.add(`station-${id}`);
+      stationForward.set(Math.sin(station.baseYaw), 0, Math.cos(station.baseYaw)).normalize();
+      stationRight.set(-Math.cos(station.baseYaw), 0, Math.sin(station.baseYaw));
+
+      camera.position.copy(station.eye);
+      const look = viewDir(station.baseYaw, station.basePitch);
+      cameraTarget.copy(station.eye).addScaledVector(look, 100);
+      camera.lookAt(cameraTarget);
+
+      // Guns sit just below and ahead of the gunner's eye along the station's view
+      const helper = new THREE.Object3D();
+      helper.position.copy(station.eye);
+      helper.lookAt(station.eye.clone().add(look));
+      helper.updateMatrixWorld(true);
+      gunMountPivot.position.copy(helper.localToWorld(new THREE.Vector3(0, -0.47, 0.55)));
+      turretFrameGroup.position.copy(station.eye);
+      turretFrameGroup.rotation.set(-station.basePitch, station.baseYaw, 0);
+      turretFrameGroup.children.forEach((c, i) => { if (i < 2) c.visible = station.struts; }); // [0,1] struts, [2] gun cradle
+
+      // Formation layout so the squadron is in view from this station
+      wingmen.forEach((w, i) => {
+        if (!w.basePos) return;
+        w.basePos.set(...station.wingmen[i]);
+        w.mesh.position.copy(w.basePos);
+      });
+
+      document.getElementById('hud-station-title').textContent = station.title;
+      document.getElementById('radar-title').textContent = station.radar[0];
+      document.getElementById('radar-sub').textContent = station.radar[1];
+      document.getElementById('station-frame').innerHTML = stationFrameSVG(id);
+    }
+
+    function viewDir(yaw, pitch) {
+      return new THREE.Vector3(Math.sin(yaw) * Math.cos(pitch), Math.sin(pitch), Math.cos(yaw) * Math.cos(pitch));
+    }
+
+    // Window framing drawn over the view
+    function stationFrameSVG(id) {
+      if (id === 'top') {
+        // Plexiglass dome: curved frame bars meeting overhead
+        return `<svg width="100%" height="100%" viewBox="0 0 100 100" preserveAspectRatio="none">
+          <path d="M14 100 C 18 55, 30 20, 50 -5" stroke="#0b1210" stroke-width="1.6" fill="none" opacity="0.9"/>
+          <path d="M86 100 C 82 55, 70 20, 50 -5" stroke="#0b1210" stroke-width="1.6" fill="none" opacity="0.9"/>
+          <path d="M0 22 C 30 12, 70 12, 100 22" stroke="#0b1210" stroke-width="0.9" fill="none" opacity="0.75"/>
+          <path d="M0 88 L100 88 L100 100 L0 100 Z" fill="#0d1411" opacity="0.92"/>
+        </svg>`;
+      }
+      if (id === 'ball') {
+        // Round armoured window: rim and the sight mount bars between the guns
+        return `<svg width="100%" height="100%" viewBox="-50 -50 100 100" preserveAspectRatio="xMidYMid slice">
+          <circle cx="0" cy="0" r="50" stroke="#0b1210" stroke-width="3" fill="none"/>
+          <circle cx="0" cy="0" r="48.5" stroke="rgba(160,190,200,0.25)" stroke-width="0.5" fill="none"/>
+          <path d="M-50 0 L-41 0 M41 0 L50 0" stroke="#0b1210" stroke-width="2.4"/>
+        </svg>`;
+      }
+      return '';
+    }
 
     // ============================================================================
     // 5. FORMATION WINGMEN (2 FRIENDLY B-17G BOMBERS FLYING ON FLANKS)
@@ -1873,7 +2195,8 @@
      * dive in on a pursuit curve toward our B-17's tail (Z: 65..110),
      * and break away sharply underneath or to the flanks (Z: -40..160).
      */
-    function createAttackSpline(targetOffset = null) {
+    function createAttackSpline(target = null) {
+      const targetOffset = target ? target.basePos : station.eye;
       const side = Math.random() < 0.5 ? -1 : 1;
       const startX = side * (90 + Math.random() * 190);
       const startY = 45 + Math.random() * 110;
@@ -1901,8 +2224,23 @@
         new THREE.Vector3(breakX, breakY, breakZ)
       ];
 
-      // Shift the whole pursuit curve onto the chosen bomber (our tail is the origin)
-      if (targetOffset) points.forEach(pt => pt.add(targetOffset));
+      // Re-shape the run for the gunner's station
+      if (station.approach === 'front') {
+        // Head-on from 12 o'clock high, firing on the way in, then flashing past over/under the formation
+        points.forEach(pt => { pt.z = -pt.z; });
+        points[0].y = 60 + Math.random() * 110;
+        points[1].y = 18 + Math.random() * 30;
+        points[2].y = 4 + Math.random() * 16;
+        points[3].y = -40 - Math.random() * 60;
+      } else if (station.approach === 'below') {
+        // Climbing in from 6 o'clock low, then breaking away below
+        points[0].y = -(50 + Math.random() * 100);
+        points[1].y = -(12 + Math.random() * 30);
+        points[2].y = -(8 + Math.random() * 18);
+        points[3].y = -(60 + Math.random() * 70);
+      }
+      // Shift the whole pursuit curve onto the chosen bomber
+      points.forEach(pt => pt.add(targetOffset));
 
       return new THREE.CatmullRomCurve3(points, false, 'catmullrom', 0.5);
     }
@@ -1920,7 +2258,7 @@
       scene.add(built.group);
 
       const target = pickAttackTarget();
-      const curve = createAttackSpline(target ? target.basePos : null);
+      const curve = createAttackSpline(target);
       const duration = Math.max(7.2, 11.5 - waveNum * 0.45) + Math.random() * 2.0;
       const maxHp = (type === 'FW190' ? 9 : 6) + DIFFICULTY.fighterHpBonus; // Fw 190 radial engine armor takes more .50-cal hits
 
@@ -2374,18 +2712,46 @@
       document.getElementById('modal-kicker').textContent = `381st Bomb Group // Mission ${m.number}`;
       modalTitleEl.textContent = `Target: ${m.name}`;
       modalDescEl.textContent = `Today's target is the ${m.target} at ${m.name}. ${WEATHER[m.weather].brief} ` +
-        `You're in the Cheyenne tail turret of "Iron Maiden": hold off 9 waves — 4 on the run in, 1 over the target and 4 on the long way home.`;
+        `Hold off ${TOTAL_WAVES} waves: 3 on the run in, 1 over the target and 3 on the way home.`;
       document.getElementById('career-insignia').innerHTML = insigniaSVG(rank.insignia);
       document.getElementById('career-rank').textContent = rank.name;
       document.getElementById('career-meta').innerHTML =
         `Missions completed: <strong>${career.completed}</strong> &middot; Career kills: <strong>${career.kills}</strong><br>` +
         `Difficulty: <strong>${DIFFICULTY.label}</strong> &middot; ${promotionStatus(career.completed)}`;
       document.getElementById('career-panel').style.display = '';
+      document.getElementById('station-picker').style.display = '';
+      refreshStationPicker();
       document.getElementById('brief-cards').style.display = '';
       modalStatsEl.classList.add('hidden');
-      document.getElementById('btn-start-mission').textContent = 'MAN THE TAIL TURRET';
+      setStartLabel();
       modalOverlayEl.classList.remove('hidden');
     }
+
+    const STATION_BRIEF = {
+      tail: 'You\'re in the Cheyenne tail turret of "Iron Maiden", facing aft',
+      top: 'You\'re in the Sperry top turret of "Iron Maiden", facing forward over the nose',
+      ball: 'You\'re curled up in the Sperry ball turret under "Iron Maiden"\'s belly'
+    };
+    function setStartLabel() {
+      const cur = career.station || 'tail';
+      document.getElementById('btn-start-mission').textContent =
+        cur === 'top' ? 'MAN THE TOP TURRET' : cur === 'ball' ? 'MAN THE BALL TURRET' : 'MAN THE TAIL GUN';
+    }
+    function refreshStationPicker() {
+      const cur = career.station || 'tail';
+      if (modalMode === 'briefing') setStartLabel();
+      document.querySelectorAll('#station-picker button').forEach(b => b.classList.toggle('sel', b.dataset.st === cur));
+      const m = state.mission;
+      if (m) {
+        modalDescEl.textContent = `Today's target is the ${m.target} at ${m.name}. ${WEATHER[m.weather].brief} ` +
+          `${STATION_BRIEF[cur]}. Hold off ${TOTAL_WAVES} waves: 3 on the run in, 1 over the target and 3 on the way home.`;
+      }
+    }
+    document.querySelectorAll('#station-picker button').forEach(b => b.addEventListener('click', () => {
+      career.station = b.dataset.st;
+      saveCareer();
+      refreshStationPicker();
+    }));
 
     // Two-tap confirm instead of a browser dialog
     let resetArmed = 0;
@@ -2405,8 +2771,8 @@
     });
 
     // ---------------- Mission: 4 waves in, 1 over the target, 4 home ----------------
-    const TOTAL_WAVES = 9;
-    const TARGET_WAVE = 5;
+    const TOTAL_WAVES = 7;
+    const TARGET_WAVE = 4;   // waves 1-3 inbound, 4 over the target, 5-7 home
     const radioBoxEl = document.getElementById('radio-box');
     const radioSpeakerEl = document.getElementById('radio-speaker');
     const radioTextEl = document.getElementById('radio-text');
@@ -2443,7 +2809,7 @@
     function startWave(waveNum) {
       state.wave = waveNum;
       state.intermission = false;
-      state.waveEnemiesRemainingToSpawn = 4 + waveNum + DIFFICULTY.extraFighters; // 5..13 fighters at Easy, more at higher ranks
+      state.waveEnemiesRemainingToSpawn = 5 + waveNum + DIFFICULTY.extraFighters; // 6..12 fighters at Easy, more at higher ranks
       state.spawnCooldown = 1.0;
       waveBadgeEl.textContent = `WAVE ${waveNum}/${TOTAL_WAVES}`;
       const phase = missionPhase(waveNum);
@@ -2453,12 +2819,10 @@
     }
 
     const BETWEEN_WAVE_CALLS = {
-      1: ['NAVIGATOR', '120 miles to the target. More bandits forming up at six o\'clock high.'],
-      2: ['NAVIGATOR', '60 miles to go. Keep them off our tail, gunners.'],
-      3: ['PILOT', 'Initial point in sight. Opening the bomb bay doors.'],
-      6: ['NAVIGATOR', '200 miles to the coast. Here they come again.'],
-      7: ['NAVIGATOR', 'Crossing into Holland. We\'re halfway home.'],
-      8: ['PILOT', 'North Sea dead ahead. One more wave, boys!']
+      1: ['NAVIGATOR', '90 miles to the target. More bandits forming up.'],
+      2: ['PILOT', 'Initial point in sight. Opening the bomb bay doors.'],
+      5: ['NAVIGATOR', 'Crossing into Holland. We\'re halfway home.'],
+      6: ['PILOT', 'North Sea dead ahead. One more wave, boys!']
     };
 
     function crewRepairs() {
@@ -2483,11 +2847,15 @@
         showRadio('PILOT', `We're over ${state.mission.name}! Bomb run — hold her steady!`, 4800);
         schedule(5, () => startWave(w + 1));
       } else if (w === TARGET_WAVE) {
-        showRadio('BOMBARDIER', 'Bombs away!', 4000);
-        schedule(1.2, () => showBanner('BOMBS AWAY!', 2600));
-        dropBombs();
-        schedule(4.5, () => { showRadio('PILOT', 'Bombs gone — turning for home!', 4500); beginTurnForHome(); });
-        schedule(11, () => startWave(w + 1));
+        showRadio('BOMBARDIER', 'Target in the sight — I\'ve got the airplane!', 3000);
+        schedule(2.6, () => startBombRun(() => {
+          // Back at the gun station: the formation's bombs are falling away beneath us
+          showRadio('BOMBARDIER', 'Bombs gone! Closing the doors.', 3200);
+          dropBombs(true);
+          schedule(3.8, () => { showRadio('PILOT', 'Turning for home!', 3500); beginTurnForHome(); });
+          schedule(7.6, announceBombResult);
+          schedule(14, () => startWave(w + 1));
+        }));
       } else if (w >= TOTAL_WAVES) {
         showRadio('PILOT', 'English coast dead ahead — we\'re going home!', 4500);
         schedule(4.5, missionComplete);
@@ -2524,6 +2892,7 @@
         survivors: wingmen.filter(w => w.status === 'alive').map(w => w.name),
         lost: wingmen.filter(w => w.status !== 'alive').map(w => w.name),
         promoted: newRank > oldRank,
+        bomb: state.bombResult,
         rank: RANKS[newRank],
         completed: career.completed,
         careerKills: career.kills
@@ -2554,25 +2923,28 @@
 
     function buildLandingScene() {
       const ls = new THREE.Scene();
-      ls.background = makeCanvasTexture(16, 256, (g, w, h) => {
+      const sky = (stops) => makeCanvasTexture(16, 256, (g, w, h) => {
         const grd = g.createLinearGradient(0, 0, 0, h);
-        grd.addColorStop(0, '#3b4f7a');    // dusk blue overhead
-        grd.addColorStop(0.45, '#c9877a');
-        grd.addColorStop(0.62, '#f0b27a'); // warm band at the horizon
-        grd.addColorStop(1, '#f6cf98');
+        stops.forEach(([o, c]) => grd.addColorStop(o, c));
         g.fillStyle = grd; g.fillRect(0, 0, w, h);
       });
+      landing.skyDusk = sky([[0, '#3b4f7a'], [0.45, '#c9877a'], [0.62, '#f0b27a'], [1, '#f6cf98']]);
+      landing.skyDawn = sky([[0, '#4f74a6'], [0.4, '#a9bfd6'], [0.6, '#f1d6c2'], [1, '#f7e6cf']]);
+      ls.background = landing.skyDusk;
       ls.fog = new THREE.Fog(0xe2b892, 300, 1700);
-      ls.add(new THREE.HemisphereLight(0xffe1bd, 0x46553a, 1.0));
+      landing.hemi = new THREE.HemisphereLight(0xffe1bd, 0x46553a, 1.0);
+      ls.add(landing.hemi);
       const sun = new THREE.DirectionalLight(0xffc690, 2.1);
       sun.position.set(-260, 140, 220);
       ls.add(sun);
+      landing.sun = sun;
 
       // Low sun on the horizon
       const sunSprite = new THREE.Sprite(new THREE.SpriteMaterial({ map: cloudTextures[0], color: 0xfff1c9, transparent: true, opacity: 0.95, fog: false, depthWrite: false }));
       sunSprite.position.set(-900, 70, -900);
       sunSprite.scale.setScalar(260);
       ls.add(sunSprite);
+      landing.sunSprite = sunSprite;
 
       // Grass airfield
       const grass = makeCanvasTexture(256, 256, (g, w, h) => {
@@ -2641,6 +3013,114 @@
       landing.cam = new THREE.PerspectiveCamera(48, window.innerWidth / window.innerHeight, 0.5, 3000);
     }
 
+    // Same airfield, two times of day: dawn for take-off, sunset for the return
+    function setAirfieldMood(mood) {
+      const dawn = mood === 'dawn';
+      landing.scene.background = dawn ? landing.skyDawn : landing.skyDusk;
+      landing.scene.fog.color.set(dawn ? 0xd9dde0 : 0xe2b892);
+      landing.hemi.color.set(dawn ? 0xe6eefa : 0xffe1bd);
+      landing.sun.color.set(dawn ? 0xffe9d0 : 0xffc690);
+      landing.sun.intensity = dawn ? 1.7 : 2.1;
+      landing.sun.position.set(dawn ? 260 : -260, 140, dawn ? -220 : 220);
+      landing.sunSprite.position.set(dawn ? 900 : -900, 70, -900);
+      landing.sunSprite.material.color.set(dawn ? 0xfff6e2 : 0xfff1c9);
+    }
+
+    const cineHintEl = document.getElementById('cine-hint');
+
+    function startTakeoff(onDone) {
+      fadeEl.style.opacity = '1';
+      modalOverlayEl.classList.add('hidden');
+      setTimeout(() => {
+        if (!landing.scene) buildLandingScene();
+        setAirfieldMood('dawn');
+        const ls = landing.scene;
+        if (landing.plane) ls.remove(landing.plane);
+        landing.parked.forEach(p => ls.remove(p));
+        landing.parked = [];
+        const plane = new THREE.Group();
+        const model = b17ForScene();
+        model.rotation.y = -Math.PI / 2;     // nose toward +X, down the runway
+        plane.add(model);
+        ls.add(plane);
+        landing.plane = plane;
+        landing.groundOffset = placeOnGround(plane);
+        // The rest of the element waiting their turn on the hardstands
+        wingmen.forEach((w, i) => {
+          const p = new THREE.Group();
+          const m = b17ForScene();
+          m.rotation.y = Math.PI;
+          p.add(m);
+          p.position.set(150 + i * 70, 0, -96 - i * 6);
+          p.position.y = placeOnGround(p);
+          ls.add(p);
+          landing.parked.push(p);
+        });
+        landing.mode = 'takeoff';
+        landing.t = 0;
+        landing.ending = false;
+        landing.onDone = onDone;
+        landing.active = true;
+        document.body.classList.add('landing');
+        cineHintEl.classList.add('show');
+        updateLandingCamAspect();
+        sound.setDroneActive(true, 0.6);
+        sound.spoolUp(6);
+        updateTakeoff(0);
+        fadeEl.style.opacity = '0';
+      }, 900);
+    }
+
+    function updateTakeoff(dt) {
+      landing.t += dt;
+      const t = landing.t;
+      const p = landing.plane;
+      const LIFTOFF = 6.2;
+      let x, alt, pitch;
+      if (t < LIFTOFF) {
+        x = -430 + 5.6 * t * t;                       // accelerating down the runway
+        alt = 0;
+        pitch = t > LIFTOFF - 0.9 ? 0.12 * (t - (LIFTOFF - 0.9)) / 0.9 : 0;   // rotate
+        if (Math.random() < 0.4 && t > 1) {
+          const puff = p.localToWorld(new THREE.Vector3(-3, 0, (Math.random() - 0.5) * 8));
+          puff.y = 0.5;
+          spawnLandingDust(puff);
+        }
+      } else {
+        const ta = t - LIFTOFF;
+        const v0 = 11.2 * LIFTOFF;
+        x = -430 + 5.6 * LIFTOFF * LIFTOFF + v0 * ta + 2 * ta * ta;
+        alt = 2.4 * ta * ta + 3 * ta;                 // climbing away
+        pitch = 0.12 + Math.min(0.04, ta * 0.02);
+      }
+      p.position.set(x, landing.groundOffset + alt, 0);
+      p.rotation.set(0, 0, pitch);
+      updateLandingDust(dt);
+
+      // Camera beside the runway, swinging round to watch her climb out
+      const cam = landing.cam;
+      const k = THREE.MathUtils.smoothstep(t, 0, 9);
+      cam.position.set(THREE.MathUtils.lerp(-400, -120, k), 4.5, THREE.MathUtils.lerp(58, 85, k));
+      cam.lookAt(p.position.x, p.position.y * 0.9 + 3, 0);
+
+      if (t > 10.5 && !landing.ending) endTakeoff();
+    }
+
+    function endTakeoff() {
+      if (landing.ending) return;
+      landing.ending = true;
+      cineHintEl.classList.remove('show');
+      fadeEl.style.opacity = '1';
+      setTimeout(() => {
+        landing.active = false;
+        landing.mode = null;
+        document.body.classList.remove('landing');
+        const cb = landing.onDone; landing.onDone = null;
+        if (cb) cb();
+        fadeEl.style.opacity = '0';
+      }, 900);
+    }
+
     function placeOnGround(obj) {
       obj.updateMatrixWorld(true);
       const box = new THREE.Box3().setFromObject(obj);
@@ -2677,6 +3157,8 @@
           landing.parked.push(p);
         });
 
+        landing.mode = 'landing';
+        setAirfieldMood('dusk');
         landing.t = 0;
         landing.touched = false;
         landing.debriefShown = false;
@@ -2776,7 +3258,7 @@
       debriefEl.innerHTML = `
         <div class="db-kicker">381st Bomb Group // Mission ${m.number}</div>
         <div class="db-title">MISSION DEBRIEF</div>
-        <div class="db-sub">${m.name} — ${m.target}. Bombs on target. ${WEATHER[m.weather].label}.</div>
+        <div class="db-sub">${m.name} — ${m.target}. ${d.bomb ? `Bombing: <b style="color:${d.bomb.grade === 'Missed' ? '#f87171' : d.bomb.grade === 'Near miss' ? '#fcd34d' : '#86efac'}">${d.bomb.grade}</b> (${d.bomb.grade === 'Direct hits' ? 'dead centre' : d.bomb.yards + ' yds ' + d.bomb.dir}).` : 'Bombs on target.'} ${WEATHER[m.weather].label}.</div>
         ${promo}
         <div class="db-grid">
           <div class="db-stat"><div class="k">Fighters you shot down</div><div class="v">${d.kills}</div></div>
@@ -2811,7 +3293,7 @@
     const bombMat = new THREE.MeshStandardMaterial({ color: 0x3f4a3a, roughness: 0.6, metalness: 0.4 });
     const flashTex = cloudTextures[0];
 
-    function dropBombs() {
+    function dropBombs(silent = false) {
       const racks = [new THREE.Vector3(0, -1.6, -12)];               // our own bomb bay
       wingmen.forEach(w => { if (w.status === 'alive') racks.push(w.mesh.position.clone().add(new THREE.Vector3(0, -1.4, -1))); });
       racks.forEach((rack, r) => {
@@ -2819,12 +3301,14 @@
           bombs.push({ pending: 0.25 * i + r * 0.12, origin: rack.clone(), mesh: null, vel: new THREE.Vector3(), age: 0 });
         }
         // one whistle per stick, slightly staggered and detuned
-        sound.playBombWhistle(0.2 + r * 0.35, 2.4 + Math.random() * 0.6);
+        if (!silent) sound.playBombWhistle(0.2 + r * 0.35, 2.4 + Math.random() * 0.6);
       });
-      sound.playBombWhistle(0.9, 3.0);
+      if (!silent) sound.playBombWhistle(0.9, 3.0);
     }
 
-    function updateBombs(dt) {
+    const impactSmoke = [];
+    let lastRumble = 0;
+    function updateBombs(dt, sweep = 0) {
       for (let i = bombs.length - 1; i >= 0; i--) {
         const b = bombs[i];
         if (!b.mesh) {
@@ -2844,6 +3328,11 @@
         b.mesh.lookAt(b.mesh.position.clone().add(b.vel));
         if (b.mesh.position.y < GROUND_Y + 8) {
           spawnGroundFlash(b.mesh.position);
+          spawnImpactSmoke(b.mesh.position);
+          if (performance.now() - lastRumble > 180) {   // a rolling rumble rather than 30 stacked booms
+            lastRumble = performance.now();
+            sound.playExplosion(0.32 + Math.random() * 0.15);
+          }
           scene.remove(b.mesh);
           bombs.splice(i, 1);
         }
@@ -2851,13 +3340,41 @@
       for (let i = groundFlashes.length - 1; i >= 0; i--) {
         const g = groundFlashes[i];
         g.age += dt;
-        g.sprite.position.z += 90 * dt;
-        g.sprite.scale.setScalar(20 + g.age * 70);
+        g.sprite.position.z += 70 * dt;
+        g.sprite.position.x += sweep * dt;
+        g.sprite.scale.setScalar(40 + g.age * 120);
         g.sprite.material.opacity = Math.max(0, 0.95 * (1 - g.age / 1.6));
         if (g.age > 1.6) {
           scene.remove(g.sprite);
           g.sprite.material.dispose();
           groundFlashes.splice(i, 1);
+        }
+      }
+    }
+
+    function spawnImpactSmoke(pos) {
+      const mat = new THREE.SpriteMaterial({ map: cloudTextures[Math.floor(Math.random() * 4)], color: 0x2e2c28,
+        transparent: true, opacity: 0.0, depthWrite: false });
+      const sprite = new THREE.Sprite(mat);
+      sprite.position.set(pos.x + (Math.random() - 0.5) * 6, GROUND_Y + 10, pos.z);
+      sprite.scale.setScalar(30);
+      scene.add(sprite);
+      impactSmoke.push({ sprite, age: 0, life: 9 + Math.random() * 4 });
+    }
+    function updateImpactSmoke(dt, sweep) {
+      for (let i = impactSmoke.length - 1; i >= 0; i--) {
+        const sm = impactSmoke[i];
+        sm.age += dt;
+        sm.sprite.position.z += 70 * dt;              // stays with the ground as we fly on
+        sm.sprite.position.x += sweep * dt;
+        sm.sprite.position.y += 7 * dt;               // smoke column rising
+        sm.sprite.scale.setScalar(30 + sm.age * 16);
+        const fadeIn = Math.min(1, sm.age / 0.6);
+        sm.sprite.material.opacity = 0.9 * fadeIn * Math.max(0, 1 - sm.age / sm.life);
+        if (sm.age > sm.life) {
+          scene.remove(sm.sprite);
+          sm.sprite.material.dispose();
+          impactSmoke.splice(i, 1);
         }
       }
     }
@@ -2870,6 +3387,252 @@
       sprite.scale.setScalar(20);
       scene.add(sprite);
       groundFlashes.push({ sprite, age: 0 });
+    }
+
+    // ======================= BOMB RUN: NORDEN BOMBSIGHT =======================
+    const BS_H = 900;          // height of the sight above the ground (game units)
+    const BS_SPEED = 75;       // ground speed in the sight (units/s)
+    const BS_RUN = 13;         // seconds from start of the run to the target
+    const bsight = { active: false, scene: null, cam: null, group: null, areaMesh: null, t: 0, dropped: false, dropT: 0,
+                     armed: false, wind: 0, bombs: [], flak: [], flakTimer: 0, clouds: [], ending: false, onDone: null };
+    const bsUI = {
+      away: document.getElementById('bs-away'), range: document.getElementById('bs-range'),
+      drift: document.getElementById('bs-drift'), target: document.getElementById('bs-target'),
+      mark: document.getElementById('bs-steer-mark')
+    };
+
+    function targetKind(target) {
+      const t = target.toLowerCase();
+      if (/dock|naval|u-boat|shipyard|slipway/.test(t)) return 'harbor';
+      if (/rail|marshalling|junction|viaduct/.test(t)) return 'rail';
+      if (/oil|chemical|refinery/.test(t)) return 'refinery';
+      return 'factory';
+    }
+
+    // The target area as the bombardier sees it: farmland, a town, a river and the target itself at the centre
+    function drawTargetArea(g, S, kind) {
+      const rnd = Math.random;
+      g.fillStyle = '#5c6c40'; g.fillRect(0, 0, S, S);
+      const fields = ['#6b7d45', '#7d8a4c', '#4f6236', '#8f8a55', '#6f6a3f', '#5d7140', '#9a8f5c'];
+      for (let i = 0; i < 900; i++) {
+        g.save(); g.translate(rnd() * S, rnd() * S); g.rotate((rnd() - 0.5) * 0.4);
+        g.fillStyle = fields[Math.floor(rnd() * fields.length)]; g.fillRect(0, 0, 30 + rnd() * 90, 20 + rnd() * 70); g.restore();
+      }
+      const c = S / 2;
+      // river bending past the target
+      g.strokeStyle = '#3f5b68'; g.lineWidth = 26; g.lineCap = 'round';
+      g.beginPath(); g.moveTo(c - 0.5 * S, c + 0.32 * S); g.bezierCurveTo(c - 0.15 * S, c + 0.05 * S, c + 0.05 * S, c + 0.2 * S, c + 0.5 * S, c - 0.1 * S); g.stroke();
+      // roads
+      g.strokeStyle = 'rgba(205,200,180,0.55)'; g.lineWidth = 4;
+      for (let i = 0; i < 6; i++) { g.beginPath(); g.moveTo(rnd() * S, 0); g.lineTo(c + (rnd() - 0.5) * 300, c + (rnd() - 0.5) * 300); g.lineTo(rnd() * S, S); g.stroke(); }
+      // the town around the target
+      for (let i = 0; i < 1400; i++) {
+        const a = rnd() * Math.PI * 2, r = 160 + Math.pow(rnd(), 0.7) * 380;
+        const x = c + Math.cos(a) * r, y = c + Math.sin(a) * r * 0.8;
+        g.fillStyle = rnd() < 0.5 ? '#8c8478' : (rnd() < 0.5 ? '#9a5d48' : '#77716a');
+        g.fillRect(x, y, 6 + rnd() * 8, 6 + rnd() * 8);
+      }
+      // clear ground around the target so it reads clearly
+      g.fillStyle = '#6d6a5c'; g.fillRect(c - 150, c - 120, 300, 240);
+      g.fillStyle = 'rgba(0,0,0,0.35)';
+      if (kind === 'harbor') {
+        g.fillStyle = '#3c5867'; g.fillRect(c - 150, c, 300, 120);                       // basin
+        g.fillStyle = '#9b978c'; for (let i = 0; i < 5; i++) g.fillRect(c - 130 + i * 60, c - 10, 14, 100); // piers
+        g.fillStyle = '#5f6266'; for (let i = 0; i < 4; i++) g.fillRect(c - 115 + i * 60, c + 20, 9, 60); // ships
+        g.fillStyle = '#b8b4aa'; g.fillRect(c - 110, c - 95, 220, 70);                   // U-boat pens / sheds
+        g.fillStyle = '#7b776e'; for (let i = 0; i < 8; i++) g.fillRect(c - 106 + i * 27, c - 92, 20, 64);
+      } else if (kind === 'rail') {
+        g.strokeStyle = '#3a3630'; g.lineWidth = 2;
+        for (let i = -14; i <= 14; i++) { g.beginPath(); g.moveTo(c - 150, c + i * 7); g.lineTo(c + 150, c + i * 6 + 8); g.stroke(); }
+        g.fillStyle = '#5c5850'; for (let i = 0; i < 40; i++) g.fillRect(c - 140 + rnd() * 260, c - 90 + rnd() * 180, 16, 4); // wagons
+        g.fillStyle = '#8f8a80'; g.beginPath(); g.arc(c + 95, c - 80, 34, 0, Math.PI); g.fill(); // roundhouse
+      } else if (kind === 'refinery') {
+        for (let i = 0; i < 24; i++) {
+          const x = c - 120 + (i % 6) * 48, y = c - 80 + Math.floor(i / 6) * 48;
+          g.fillStyle = '#b9b5ab'; g.beginPath(); g.arc(x, y, 15, 0, Math.PI * 2); g.fill();
+          g.fillStyle = 'rgba(0,0,0,0.3)'; g.beginPath(); g.arc(x + 4, y + 4, 15, 0, Math.PI * 2); g.fill();
+        }
+        g.strokeStyle = '#4a4740'; g.lineWidth = 3;
+        for (let i = 0; i < 6; i++) { g.beginPath(); g.moveTo(c - 140, c - 100 + i * 40); g.lineTo(c + 140, c - 100 + i * 40); g.stroke(); }
+      } else {
+        // factory: long sheds with sawtooth roofs, chimneys and a rail siding
+        for (let k = 0; k < 5; k++) {
+          const x = c - 130 + (k % 3) * 90, y = c - 100 + Math.floor(k / 3) * 110;
+          g.fillStyle = '#a9a59b'; g.fillRect(x, y, 78, 90);
+          g.fillStyle = '#6e6b63'; for (let r = 0; r < 90; r += 9) g.fillRect(x, y + r, 78, 4);
+        }
+        g.fillStyle = '#2b2925'; [[c + 110, c - 70], [c + 120, c + 30], [c - 20, c + 105]].forEach(([x, y]) => { g.beginPath(); g.arc(x, y, 8, 0, Math.PI * 2); g.fill(); });
+        g.strokeStyle = '#3a3630'; g.lineWidth = 3; g.beginPath(); g.moveTo(c - 160, c + 125); g.lineTo(c + 160, c + 110); g.stroke();
+      }
+    }
+
+    function buildBombsightScene() {
+      const sc = new THREE.Scene();
+      sc.background = new THREE.Color(0x9aadbb);
+      sc.fog = new THREE.Fog(0xa6b5c0, 800, 1700);
+      sc.add(new THREE.HemisphereLight(0xe3ecf6, 0x55613f, 1.15));
+      const sun = new THREE.DirectionalLight(0xfff4e0, 1.3);
+      sun.position.set(300, 1000, 200);
+      sc.add(sun);
+      const grp = new THREE.Group();
+      sc.add(grp);
+      const farmTex = createGroundTexture();
+      farmTex.repeat.set(36, 36);
+      const farm = new THREE.Mesh(new THREE.PlaneGeometry(9000, 9000), new THREE.MeshLambertMaterial({ map: farmTex }));
+      farm.rotation.x = -Math.PI / 2; farm.position.y = -0.5;
+      grp.add(farm);
+      bsight.scene = sc;
+      bsight.group = grp;
+      bsight.cam = new THREE.PerspectiveCamera(50, window.innerWidth / window.innerHeight, 10, 3000);
+      bsight.cam.position.set(0, BS_H, 0);
+      bsight.cam.up.set(0, 0, -1);         // direction of flight is the top of the sight
+      bsight.cam.lookAt(0, 0, 0);
+    }
+
+    function startBombRun(onDone) {
+      fadeEl.style.opacity = '1';
+      setTimeout(() => {
+        if (!bsight.scene) buildBombsightScene();
+        const m = state.mission;
+        // fresh target area for this mission
+        if (bsight.areaMesh) { bsight.group.remove(bsight.areaMesh); bsight.areaMesh.material.map.dispose(); bsight.areaMesh.material.dispose(); }
+        const tex = makeCanvasTexture(2048, 2048, (g, w) => drawTargetArea(g, w, targetKind(m.target)));
+        bsight.areaMesh = new THREE.Mesh(new THREE.PlaneGeometry(2400, 2400), new THREE.MeshLambertMaterial({ map: tex }));
+        bsight.areaMesh.rotation.x = -Math.PI / 2;
+        bsight.group.add(bsight.areaMesh);
+        // Start the run with the target ahead and off to one side; a crosswind keeps pushing us off
+        const side = Math.random() < 0.5 ? -1 : 1;
+        bsight.group.position.set(side * (60 + Math.random() * 110), 0, -BS_SPEED * BS_RUN);
+        bsight.wind = (Math.random() < 0.5 ? -1 : 1) * (5 + Math.random() * 9);
+        bsight.t = 0; bsight.dropped = false; bsight.armed = false; bsight.ending = false; bsight.onDone = onDone;
+        bsight.bombs.forEach(b => bsight.scene.remove(b)); bsight.bombs = [];
+        bsight.flak.forEach(f => bsight.scene.remove(f.sprite)); bsight.flak = [];
+        bsight.clouds.forEach(c => bsight.group.remove(c)); bsight.clouds = [];
+        const nClouds = { clear: 0, scattered: 6, broken: 14 }[m.weather];
+        for (let i = 0; i < nClouds; i++) {
+          const sp = new THREE.Sprite(new THREE.SpriteMaterial({ map: cloudTextures[i % 4], color: 0xffffff, transparent: true, opacity: 0.55, depthWrite: false }));
+          sp.position.set((Math.random() - 0.5) * 1400, 380 + Math.random() * 220, -BS_SPEED * BS_RUN * 0.2 + (Math.random() - 0.5) * 2400);
+          sp.scale.setScalar(220 + Math.random() * 260);
+          bsight.group.add(sp);
+          bsight.clouds.push(sp);
+        }
+        bsUI.target.textContent = `${m.name.toUpperCase()}`;
+        bsUI.away.classList.remove('show');
+        updateBombsightCamAspect();
+        updateAimFromPointer(window.innerWidth / 2, window.innerHeight / 2);
+        fireBtn.textContent = 'DROP';
+        bsight.active = true;
+        document.body.classList.add('bombsight');
+        fadeEl.style.opacity = '0';
+      }, 900);
+    }
+
+    function updateBombsightCamAspect() {
+      if (!bsight.cam) return;
+      bsight.cam.aspect = window.innerWidth / window.innerHeight;
+      bsight.cam.updateProjectionMatrix();
+    }
+
+    function updateBombsight(dt) {
+      bsight.t += dt;
+      const grp = bsight.group;
+      // Steering: deflect the mouse / drag (or A-D keys) left or right of centre to correct course
+      const steer = THREE.MathUtils.clamp(state.pointerNDC.x * 1.4 + (state.keySteer || 0), -1, 1);
+      if (!bsight.dropped) grp.position.x -= steer * 55 * dt;
+      grp.position.x += bsight.wind * dt;
+      grp.position.z += BS_SPEED * dt;
+      bsUI.mark.style.left = `${50 + steer * 46}%`;
+      bsUI.range.textContent = `${Math.max(0, -grp.position.z / 300).toFixed(1)} MI`;
+      bsUI.drift.textContent = bsight.wind > 0 ? 'WIND FROM LEFT ▸' : '◂ WIND FROM RIGHT';
+
+      // Release: wait for the trigger to be let go once (no accidental drop from held fire), then any press drops
+      if (!state.isFiring && bsight.t > 1.0) bsight.armed = true;
+      if (!bsight.dropped && ((bsight.armed && state.isFiring) || grp.position.z > 140)) releaseBombs();
+
+      // Flak bursting between us and the ground
+      bsight.flakTimer -= dt;
+      if (bsight.flakTimer <= 0 && !bsight.ending) {
+        bsight.flakTimer = 0.5 + Math.random() * 0.8;
+        const sp = new THREE.Sprite(new THREE.SpriteMaterial({ map: cloudTextures[Math.floor(Math.random() * 4)], color: 0x222426, transparent: true, opacity: 0.85, depthWrite: false }));
+        sp.position.set((Math.random() - 0.5) * 520, BS_H - 140 - Math.random() * 450, (Math.random() - 0.5) * 520);
+        sp.scale.setScalar(25);
+        bsight.scene.add(sp);
+        bsight.flak.push({ sprite: sp, age: 0 });
+        if (Math.random() < 0.45) sound.playExplosion(0.3);
+      }
+      for (let i = bsight.flak.length - 1; i >= 0; i--) {
+        const f = bsight.flak[i];
+        f.age += dt;
+        f.sprite.position.z += BS_SPEED * 0.4 * dt;
+        f.sprite.scale.setScalar(25 + f.age * 40);
+        f.sprite.material.opacity = Math.max(0, 0.85 * (1 - f.age / 2.5));
+        if (f.age > 2.5) { bsight.scene.remove(f.sprite); f.sprite.material.dispose(); bsight.flak.splice(i, 1); }
+      }
+
+      // Our stick of bombs falling away under the aircraft
+      for (const b of bsight.bombs) {
+        b.userData.vy += 70 * dt;
+        b.position.y -= b.userData.vy * dt;
+        b.position.z += b.userData.trail * dt;
+      }
+
+      if (bsight.dropped && !bsight.ending && bsight.t - bsight.dropT > 3.2) endBombRun();
+    }
+
+    function releaseBombs() {
+      bsight.dropped = true;
+      bsight.dropT = bsight.t;
+      // The crosshair marks where the bombs land; how far was the target from it?
+      const dx = bsight.group.position.x;   // target right of the crosshair  -> bombs fell left of it
+      const dz = bsight.group.position.z;   // target still ahead (negative)  -> bombs fell short
+      const miss = Math.hypot(dx, dz);
+      const dir = Math.abs(dz) >= Math.abs(dx) ? (dz < 0 ? 'short' : 'long') : (dx > 0 ? 'left' : 'right');
+      const yards = Math.round(miss * 2);
+      const m = state.mission;
+      let grade, line;
+      if (miss <= 20)       { grade = 'Direct hits';  line = `Shacked it! Bombs right on the ${m.target}!`; }
+      else if (miss <= 50)  { grade = 'On target';    line = `Good bombs — hits all over the target area.`; }
+      else if (miss <= 110) { grade = 'Near miss';    line = `Near miss — the stick fell ${dir} and only clipped the edge of the target.`; }
+      else                  { grade = 'Missed';       line = `Missed — the bombs fell well ${dir} of the target.`; }
+      state.bombResult = { grade, line, yards, dir };
+      // the stick: ten bombs leaving the bay one after another
+      const geo = new THREE.CylinderGeometry(0.9, 0.9, 5, 8);
+      const mat = new THREE.MeshLambertMaterial({ color: 0x2f3a2c });
+      for (let i = 0; i < 10; i++) {
+        const b = new THREE.Mesh(geo, mat);
+        b.position.set((Math.random() - 0.5) * 3, BS_H - 14 - i * 3, i * 2.2);
+        b.userData = { vy: 4 + i * 2.5, trail: 2 + i * 0.6 };
+        bsight.scene.add(b);
+        bsight.bombs.push(b);
+      }
+      bsUI.away.classList.add('show');
+      showRadio('BOMBARDIER', 'Bombs away!', 2600);
+      sound.playBombWhistle(0.1, 2.8);
+      sound.playBombWhistle(0.45, 2.6);
+      sound.playBombWhistle(0.8, 3.0);
+    }
+
+    function endBombRun() {
+      bsight.ending = true;
+      fadeEl.style.opacity = '1';
+      setTimeout(() => {
+        bsight.active = false;
+        document.body.classList.remove('bombsight');
+        bsUI.away.classList.remove('show');
+        fireBtn.textContent = state.overheated ? 'COOLING' : 'FIRE';
+        state.isFiring = false;
+        updateAimFromPointer(window.innerWidth / 2, window.innerHeight / 2);
+        fadeEl.style.opacity = '0';
+        const cb = bsight.onDone; bsight.onDone = null;
+        if (cb) cb();
+      }, 900);
+    }
+
+    function announceBombResult() {
+      const r = state.bombResult;
+      if (!r) return;
+      showRadio('BOMBARDIER', r.line, 5200);
+      showBanner(r.grade === 'Missed' ? 'BOMBS MISSED THE TARGET' : r.grade === 'Near miss' ? 'NEAR MISS' : 'BOMBS ON TARGET!', 2600);
     }
 
     // ---------------- 180° turn for home: the formation banks, the world swings past ----------------
@@ -2893,6 +3656,9 @@
       bombs.length = 0;
       groundFlashes.forEach(g => scene.remove(g.sprite));
       groundFlashes.length = 0;
+      impactSmoke.forEach(sm => scene.remove(sm.sprite));
+      impactSmoke.length = 0;
+      state.bombResult = null;
       radioBoxEl.classList.remove('show');
     }
 
@@ -2910,8 +3676,8 @@
       state.pointerNDC.y = -(y / window.innerHeight) * 2 + 1;
 
       // Subtle Cheyenne turret head-turn parallax based on aim deflection
-      state.turretYaw = -state.pointerNDC.x * 0.42;   // +/- ~24 deg camera pan
-      state.turretPitch = state.pointerNDC.y * 0.30;  // +/- ~17 deg camera tilt
+      state.turretYaw = -state.pointerNDC.x * station.yawRange;   // camera pan within the station's arc
+      state.turretPitch = state.pointerNDC.y * station.pitchRange; // camera tilt
 
       const azDeg = Math.round(state.pointerNDC.x * 45);
       const elDeg = Math.round(state.pointerNDC.y * 30);
@@ -2962,7 +3728,7 @@
 
         // Eject spinning brass casing inside turret
         const casing = new THREE.Mesh(casingGeo, casingMat);
-        casing.position.set(xOff * 1.15, 0.12, 0.65);
+        casing.position.copy(gunRecoilGroup.localToWorld(new THREE.Vector3(xOff * 1.15, -0.05, 0.1)));
         scene.add(casing);
         brassCasings.push({
           mesh: casing,
@@ -3024,6 +3790,7 @@
     const isTouchLike = (e) => e.pointerType === 'touch' || e.pointerType === 'pen';
 
     window.addEventListener('pointerdown', (e) => {
+      if (landing.active && landing.mode === 'takeoff') { endTakeoff(); return; }
       if (e.target.closest('button') || e.target.closest('#modal-overlay')) return;
       sound.init();
       if (isTouchLike(e)) {
@@ -3094,8 +3861,13 @@
       if (e.code === 'Space') {
         // Stop Space from "clicking" whichever HUD button last had focus (e.g. restarting the mission)
         e.preventDefault();
+        if (landing.active && landing.mode === 'takeoff') { endTakeoff(); return; }
         if (document.activeElement && document.activeElement.blur) document.activeElement.blur();
         state.isFiring = true;
+      } else if (e.code === 'KeyA' || e.code === 'ArrowLeft') {
+        state.keySteer = -1;
+      } else if (e.code === 'KeyD' || e.code === 'ArrowRight') {
+        state.keySteer = 1;
       } else if (e.code === 'KeyG') {
         toggleGyroSight();
       } else if (e.code === 'KeyM') {
@@ -3106,6 +3878,8 @@
     window.addEventListener('keyup', (e) => {
       if (e.code === 'Space') {
         state.isFiring = false;
+      } else if (['KeyA', 'ArrowLeft', 'KeyD', 'ArrowRight'].includes(e.code)) {
+        state.keySteer = 0;
       }
     });
 
@@ -3139,7 +3913,7 @@
       }
       aimPointerId = null;
       updateAimFromPointer(window.innerWidth / 2, window.innerHeight / 2);
-      resetAndStartMission();
+      startTakeoff(() => resetAndStartMission());
     });
 
     function resetAndStartMission() {
@@ -3151,6 +3925,7 @@
       enemyBullets.forEach(b => scene.remove(b.mesh));
       enemyBullets.length = 0;
       resetDeathCam();
+      applyStation(career.station || 'tail');
       clearBulletHoles();
       resetWingmen();
 
@@ -3187,6 +3962,7 @@
       modalMode = 'failed';
       document.getElementById('modal-kicker').textContent = `381st Bomb Group // Mission ${state.mission.number} — ${state.mission.name}`;
       document.getElementById('career-panel').style.display = 'none';
+      document.getElementById('station-picker').style.display = 'none';
       document.getElementById('brief-cards').style.display = 'none';
       modalTitleEl.textContent = 'MISSION FAILED';
       const where = { ingress: `on the run in to ${state.mission.name}`, target: `over ${state.mission.name}`, egress: 'on the way home' }[missionPhase()];
@@ -3222,7 +3998,8 @@
       state.health = Math.max(0, state.health - amount);
       state.stats.hitsTaken++;
       state.stats.damageTaken += dealt;
-      addBulletHole();
+      sound.playHullHit();
+      if (Math.random() < 0.4) addBulletHole(); // some rounds come through the glass, the rest hit the airframe
       buzz(35);
       updateHealthUI();
       damageOverlayEl.style.opacity = '0.85';
@@ -3243,7 +4020,8 @@
     const killcamKillerEl = document.getElementById('killcam-killer');
 
     // Procedural SVG bullet hole: dark puncture, frosted ring and jagged radial cracks
-    function addBulletHole() {
+    function addBulletHole(silent = false) {
+      if (!silent) sound.playGlassCrack();
       if (glassDamageEl.children.length >= 16) glassDamageEl.firstElementChild.remove();
       const size = 46 + Math.random() * 70;
       let cracks = '';
@@ -3318,7 +4096,7 @@
       deathCam.phase = 'cam';
       document.body.classList.add('killcam');
       impactFlashEl.style.opacity = '0';
-      camera.position.set(0, 0.65, 0);
+      camera.position.copy(station.eye);
 
       // Work out where the airframe actually is (GLB or procedural) in bomberGroup-local space
       bomberGroup.position.set(0, 0, 0);
@@ -3376,7 +4154,7 @@
       if (deathCam.phase === 'impact') {
         // Turret takes the fatal burst: violent shake, more holes, white-out, then cut outside
         const shake = 0.06 * (1 - t / 0.9);
-        camera.position.set((Math.random() - 0.5) * shake, 0.65 + (Math.random() - 0.5) * shake, 0);
+        camera.position.copy(station.eye).add(new THREE.Vector3((Math.random() - 0.5) * shake, (Math.random() - 0.5) * shake, 0));
         camera.lookAt(cameraTarget);
         if (t > 0.25 && !deathCam.events.hole1) { deathCam.events.hole1 = true; addBulletHole(); addBulletHole(); }
         if (t > 0.5 && !deathCam.events.hole2) { deathCam.events.hole2 = true; addBulletHole(); addBulletHole(); sound.playExplosion(0.8); }
@@ -3466,7 +4244,7 @@
       bomberGroup.visible = true;
       bomberGroup.position.set(0, 0, 0);
       bomberGroup.rotation.set(0, 0, 0);
-      camera.position.set(0, 0.65, 0);
+      camera.position.copy(station.eye);
       camera.lookAt(cameraTarget);
       state.lastAttacker = null;
     }
@@ -3480,8 +4258,9 @@
 
       for (const e of enemies) {
         if (e.isDead) continue;
-        const d = e.mesh.position.length();
-        if (d < minDist && e.mesh.position.z > 10) {
+        const rel = e.mesh.position.clone().sub(station.eye);
+        const d = rel.length();
+        if (d < minDist && rel.dot(stationForward) > 10) {
           minDist = d;
           closestEnemy = e;
         }
@@ -3555,8 +4334,8 @@
         if (wm.status !== 'alive') continue;
         radarCtx.fillStyle = '#34d399';
         radarCtx.fillRect(
-          Math.max(3, Math.min(w - 7, cx - (wm.mesh.position.x / 260) * (w / 2) - 2)),
-          Math.max(3, Math.min(h - 7, cy - ((wm.mesh.position.z - 350) / 350) * (h / 2) - 2)),
+          Math.max(3, Math.min(w - 7, cx + (wm.mesh.position.clone().sub(station.eye).dot(stationRight) / 260) * (w / 2) - 2)),
+          Math.max(3, Math.min(h - 7, cy - ((wm.mesh.position.clone().sub(station.eye).dot(stationForward) - 350) / 350) * (h / 2) - 2)),
           4, 4
         );
       }
@@ -3564,8 +4343,9 @@
       // Blips (X vs Z rear sector)
       for (const e of enemies) {
         if (e.isDead) continue;
-        const rx = cx - (e.mesh.position.x / 260) * (w / 2); // Mirror X for rear-facing view
-        const ry = cy - ((e.mesh.position.z - 350) / 350) * (h / 2);
+        const relE = e.mesh.position.clone().sub(station.eye);
+        const rx = cx + (relE.dot(stationRight) / 260) * (w / 2); // scope is drawn as the gunner sees it
+        const ry = cy - ((relE.dot(stationForward) - 350) / 350) * (h / 2);
         radarCtx.fillStyle = e === closestEnemy ? '#fbbf24' : '#ef4444';
         radarCtx.beginPath();
         radarCtx.arc(
@@ -3600,8 +4380,13 @@
       lastTime = now;
 
       if (landing.active) {
-        updateLanding(dt);
+        if (landing.mode === 'takeoff') updateTakeoff(dt); else updateLanding(dt);
         renderer.render(landing.scene, landing.cam);
+        return;
+      }
+      if (bsight.active) {
+        updateBombsight(dt);
+        renderer.render(bsight.scene, bsight.cam);
         return;
       }
 
@@ -3614,11 +4399,8 @@
         bomberGroup.rotation.z = Math.sin(timeSec * 1.1) * 0.008 + currentTurnBank();
 
         // Smoothly orient camera & twin .50-cal mount toward player reticle
-        const desiredLook = new THREE.Vector3(
-          Math.sin(state.turretYaw) * 120,
-          0.65 + Math.sin(state.turretPitch) * 90,
-          Math.cos(state.turretYaw) * 120
-        );
+        const desiredLook = station.eye.clone().addScaledVector(
+          viewDir(station.baseYaw + state.turretYaw, station.basePitch + state.turretPitch), 120);
         cameraTarget.lerp(desiredLook, 10 * dt);
         camera.lookAt(cameraTarget);
         const bank = currentTurnBank();
@@ -3758,7 +4540,8 @@
         }
         updateMissionEvents(dt);
       }
-      updateBombs(dt);
+      updateBombs(dt, turnSweep);
+      updateImpactSmoke(dt, turnSweep);
 
       hudBanditsEl.textContent = String(enemies.filter(e => !e.isDead).length);
 
@@ -3796,7 +4579,8 @@
         if (f.t >= 1.0) {
           // Completed pass, loop back for another attack run if still alive
           f.target = pickAttackTarget();
-          f.curve = createAttackSpline(f.target ? f.target.basePos : null);
+          f.curve = createAttackSpline(f.target);
+          f.flybyPlayed = false;
           f.t = 0;
           continue;
         }
@@ -3804,6 +4588,18 @@
         const newPos = f.curve.getPointAt(f.t);
         f.velocity.subVectors(newPos, prevPos).divideScalar(Math.max(0.001, dt));
         f.mesh.position.copy(newPos);
+
+        // Engine roar as a fighter closes and flashes past the gunner
+        const camDist = newPos.distanceTo(camera.position);
+        if (!f.flybyPlayed && camDist < 190 && f.prevCamDist !== undefined && camDist < f.prevCamDist) {
+          const closing = (f.prevCamDist - camDist) / Math.max(0.001, dt);
+          if (closing > 60) {
+            f.flybyPlayed = true;
+            const v = newPos.clone().applyMatrix4(camera.matrixWorldInverse);
+            sound.playFlyby(v.x / Math.max(25, Math.abs(v.z)), THREE.MathUtils.clamp(1.25 - camDist / 190, 0.35, 1));
+          }
+        }
+        f.prevCamDist = camDist;
 
         // Orient fighter along tangent and bank into turns
         const lookAheadPos = f.curve.getPointAt(Math.min(1.0, f.t + 0.02));
@@ -3834,7 +4630,7 @@
             // Spawn enemy 20mm tracer aimed at its chosen bomber (our tail turret or a wingman)
             const tgt = f.target && f.target.status === 'alive' ? f.target : null;
             // Real gunnery scatter: grows with range, so only a fraction of rounds actually connect
-            const aimPoint = tgt ? tgt.mesh.position : new THREE.Vector3(0, 0, 0);
+            const aimPoint = tgt ? tgt.mesh.position : station.eye;
             const spread = DIFFICULTY.enemySpreadBase + f.mesh.position.distanceTo(aimPoint) * DIFFICULTY.enemySpreadPerUnit;
             const targetSpot = aimPoint.clone().add(new THREE.Vector3(
               (Math.random() - 0.5) * 2 * spread * (tgt ? 1.6 : 1),
@@ -3929,14 +4725,14 @@
         // Swept hit test: closest approach of this frame's travel segment to the turret (origin),
         // so fast rounds can't tunnel through on low frame rates.
         const seg = eb.mesh.position.clone().sub(segStart);
-        const segT = THREE.MathUtils.clamp(-segStart.dot(seg) / Math.max(1e-6, seg.lengthSq()), 0, 1);
-        const closest = segStart.clone().addScaledVector(seg, segT);
-        if (closest.z <= 2.5 && closest.z >= -4.0) {
+        const rel0 = segStart.clone().sub(station.eye);
+        const segT = THREE.MathUtils.clamp(-rel0.dot(seg) / Math.max(1e-6, seg.lengthSq()), 0, 1);
+        const closest = rel0.addScaledVector(seg, segT); // relative to the gunner
+        {
           if (closest.length() < 4.2) {
             state.lastAttacker = eb.owner || state.lastAttacker;
             const [dMin, dMax] = DIFFICULTY.enemyHitDamage;
             triggerDamageFlash(dMin + Math.floor(Math.random() * (dMax - dMin + 1)));
-            sound.playExplosion(0.35);
             scene.remove(eb.mesh);
             enemyBullets.splice(i, 1);
             continue;
@@ -3958,7 +4754,8 @@
           if (hitWingman) break;
         }
 
-        if (hitWingman || eb.age >= eb.maxAge || eb.mesh.position.z < -20) {
+        // (lifetime only: with head-on attacks from the top turret's side, rounds legitimately fly at -Z)
+        if (hitWingman || eb.age >= eb.maxAge) {
           scene.remove(eb.mesh);
           enemyBullets.splice(i, 1);
         }
@@ -4015,6 +4812,7 @@
     window.addEventListener('resize', () => {
       updateCameraFov();
       updateLandingCamAspect();
+      updateBombsightCamAspect();
       renderer.setSize(window.innerWidth, window.innerHeight);
       // Keep the reticle at the same relative spot (e.g. after rotating a phone)
       updateAimFromPointer((state.pointerNDC.x + 1) / 2 * window.innerWidth, (1 - state.pointerNDC.y) / 2 * window.innerHeight);
