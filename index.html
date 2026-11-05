@@ -2615,6 +2615,8 @@
       { label: 'Ace',       enemyHitDamage: [6, 9], wingmanHitDamage: [6, 9], enemySpreadBase: 2.5, enemySpreadPerUnit: 0.006, enemyFireCooldownMin: 0.45, repairBetweenWaves: 5,  wingmanRepairBetweenWaves: 0.03, extraFighters: 5, maxSimultaneous: 7, fighterHpBonus: 2 }
     ];
     const DIFFICULTY = { ...DIFFICULTY_TIERS[0] };
+    // Global trim on enemy cannon damage at every rank (0.93 = 7% less than the tier tables above)
+    const ENEMY_DAMAGE_SCALE = 0.93;
 
     // Promotion every 2 successful missions
     const MISSIONS_PER_PROMOTION = 2;
@@ -4732,7 +4734,7 @@
           if (closest.length() < 4.2) {
             state.lastAttacker = eb.owner || state.lastAttacker;
             const [dMin, dMax] = DIFFICULTY.enemyHitDamage;
-            triggerDamageFlash(dMin + Math.floor(Math.random() * (dMax - dMin + 1)));
+            triggerDamageFlash((dMin + Math.floor(Math.random() * (dMax - dMin + 1))) * ENEMY_DAMAGE_SCALE);
             scene.remove(eb.mesh);
             enemyBullets.splice(i, 1);
             continue;
@@ -4748,7 +4750,7 @@
             if (pointHitsWingman(w, pt)) {
               hitWingman = true;
               const [wMin, wMax] = DIFFICULTY.wingmanHitDamage;
-              damageWingman(w, wMin + Math.floor(Math.random() * (wMax - wMin + 1)), eb.owner, pt);
+              damageWingman(w, (wMin + Math.floor(Math.random() * (wMax - wMin + 1))) * ENEMY_DAMAGE_SCALE, eb.owner, pt);
             }
           }
           if (hitWingman) break;
