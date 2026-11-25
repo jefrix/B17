@@ -115,6 +115,8 @@
     #killcam-caption .big { font-size: clamp(22px, 4vw, 44px); font-weight: 700; color: #fff; }
     #killcam-caption .small { font-size: clamp(11px, 1.3vw, 15px); color: #fca5a5; margin-top: 2px; }
     /* Crew intercom messages */
+    /* Centre banner sits low and small so it never covers the sky the gunner is watching */
+    #wave-banner { font-size: clamp(16px, 2.3vw, 26px) !important; transform: translateY(26vh); }
     #radio-box { position: fixed; left: 50%; top: 21%; transform: translateX(-50%); z-index: 33; pointer-events: none;
       max-width: min(620px, 92vw); padding: 10px 18px; border-radius: 10px; text-align: center;
       background: rgba(10, 18, 14, 0.82); border: 1px solid rgba(252, 211, 77, 0.55);
@@ -143,8 +145,19 @@
     .bs-steer::after { content: ''; position: absolute; left: 50%; top: -4px; width: 1px; height: 18px; background: rgba(207,232,214,0.6); }
     #bs-steer-mark { position: absolute; top: 1px; width: 14px; height: 6px; margin-left: -7px; left: 50%; background: #fcd34d; border-radius: 3px; }
     .bs-hint { bottom: max(18px, env(safe-area-inset-bottom)); left: 50%; transform: translateX(-50%); text-align: center; font-size: 11px; width: min(640px, 92vw); }
-    #bs-away { position: absolute; left: 50%; top: 30%; transform: translateX(-50%); font-family: 'Chakra Petch', sans-serif; font-weight: 700;
-      font-size: clamp(26px, 5vw, 52px); color: #fde68a; letter-spacing: 0.12em; text-shadow: 0 4px 16px #000; opacity: 0; transition: opacity 0.3s; }
+    .bs-steer-lbl, .bs-rate-lbl { position: absolute; font-size: 10px; letter-spacing: 0.25em; color: #cfe8d6; text-shadow: 0 1px 3px #000; }
+    .bs-steer-lbl { left: 50%; top: -22px; transform: translateX(-50%); }
+    #bs-steer-in { position: absolute; top: 2px; width: 4px; height: 4px; margin-left: -2px; left: 50%; background: rgba(207,232,214,0.7); border-radius: 2px; }
+    .bs-rate { position: absolute; right: max(26px, env(safe-area-inset-right)); top: 50%; transform: translateY(-50%); width: 10px; height: min(320px, 50vh);
+      border: 1px solid rgba(207,232,214,0.5); border-radius: 5px; }
+    .bs-rate-lbl { right: -8px; top: -24px; }
+    .bs-rate-index { position: absolute; top: 50%; left: -8px; width: 26px; height: 2px; margin-top: -1px; background: #86efac; }
+    #bs-needle { position: absolute; left: -4px; width: 18px; height: 4px; margin-top: -2px; top: 4%; background: #fcd34d; border-radius: 2px; }
+    #bs-needle.hot { background: #86efac; box-shadow: 0 0 10px #86efac; }
+    #bombsight-ui.flak-hit .bs-mask { animation: bsFlak 0.5s ease-out; }
+    @keyframes bsFlak { 0% { background-color: rgba(200,40,20,0.35); } 100% { background-color: rgba(200,40,20,0); } }
+    #bs-away { position: absolute; left: 50%; top: 66%; transform: translateX(-50%); font-family: 'Chakra Petch', sans-serif; font-weight: 700;
+      font-size: clamp(18px, 3vw, 32px); color: #fde68a; letter-spacing: 0.12em; text-shadow: 0 4px 16px #000; opacity: 0; transition: opacity 0.3s; }
     #bs-away.show { opacity: 1; }
     body.touch-mode .bs-hint .desk { display: none; }
     body:not(.touch-mode) .bs-hint .touch { display: none; }
@@ -163,6 +176,9 @@
       box-shadow: none; }
     body.station-top .turret-vignette {
       background: radial-gradient(ellipse at 50% 30%, rgba(12,22,30,0) 58%, rgba(8,14,18,0.45) 82%, rgba(4,8,10,0.85) 100%); }
+    body.station-waist .turret-vignette {
+      background: radial-gradient(ellipse at 50% 46%, rgba(0,0,0,0) 0, rgba(0,0,0,0) 46%, rgba(10,14,12,0.55) 66%, rgba(6,9,8,0.92) 82%); box-shadow: none; }
+    body.station-waist .plexiglass-glare { display: none; }
     body.killcam #station-frame, body.landing #station-frame { display: none; }
     #station-picker { margin-bottom: 14px; text-align: left; }
     #station-picker .sp-label { font-size: 10px; letter-spacing: 0.25em; color: #fcd34d; margin-bottom: 6px; text-transform: uppercase; }
@@ -277,7 +293,7 @@
       #hud-bottom { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
       #panel-health, #panel-heat { padding: 6px 9px; }
       #panel-health .text-xs, #panel-heat .text-xs { font-size: 10px; }
-      #wave-banner { font-size: 20px; padding: 0 12px; }
+      #wave-banner { font-size: 15px !important; padding: 0 12px; transform: translateY(20vh); }
     }
     /* Short landscape phones: fit the briefing + start button on one screen */
     @media (max-height: 520px) {
@@ -477,7 +493,7 @@
       <!-- Right: Twin .50-Cal M2 Browning Ammo & Barrel Temperature -->
       <div id="panel-heat" class="hud-panel p-3 rounded-lg">
         <div class="flex justify-between items-center text-xs mb-1">
-          <span class="text-amber-300 font-bold tracking-wider">TWIN .50-CAL M2 BROWNING (850 RPM)</span>
+          <span id="hud-gun-name" class="text-amber-300 font-bold tracking-wider">TWIN .50-CAL M2 BROWNING (850 RPM)</span>
           <span id="hud-heat-pct" class="font-bold text-emerald-300">TEMP 18%</span>
         </div>
         <div class="w-full h-3 bg-black/70 rounded overflow-hidden border border-amber-500/30 p-0.5">
@@ -508,10 +524,11 @@
     </svg>
     <div class="bs-panel bs-top">NORDEN M-9 BOMBSIGHT // BOMBARDIER</div>
     <div class="bs-panel bs-left">TARGET <b id="bs-target">—</b><br>RANGE <b id="bs-range">3.0 MI</b><br>DRIFT <b id="bs-drift">—</b><br>ALT <b>24,500 FT</b></div>
-    <div class="bs-steer"><div id="bs-steer-mark"></div></div>
+    <div class="bs-steer"><span class="bs-steer-lbl">DRIFT</span><div id="bs-steer-in"></div><div id="bs-steer-mark"></div></div>
+    <div class="bs-rate"><span class="bs-rate-lbl">RELEASE</span><div class="bs-rate-index"></div><div id="bs-needle"></div></div>
     <div class="bs-panel bs-hint">
-      <span class="desk">Steer: move the mouse left / right (or A / D) &middot; Release: click or SPACE when the target is under the crosshair</span>
-      <span class="touch">Drag left / right to steer &middot; tap DROP when the target is under the crosshair</span>
+      <span class="desk">Kill the drift: nudge the mouse (or A / D) to turn, centre it once the target stops sliding &middot; Release: click or SPACE as the needle meets the index</span>
+      <span class="touch">Drag to turn, centre to hold &middot; tap DROP as the needle meets the index</span>
     </div>
     <div id="bs-away">BOMBS AWAY!</div>
   </div>
@@ -559,6 +576,8 @@
           <button type="button" data-st="tail"><span class="t">TAIL GUN</span><span class="d">Facing aft. Fighters attack from behind.</span></button>
           <button type="button" data-st="top"><span class="t">TOP TURRET</span><span class="d">Facing forward over the nose. Head-on attacks from 12 o'clock high.</span></button>
           <button type="button" data-st="ball"><span class="t">BALL TURRET</span><span class="d">Under the belly. Attacks from low behind, the formation above you.</span></button>
+          <button type="button" data-st="waist"><span class="t">LEFT WAIST</span><span class="d">Single .50 at the port window. Beam attacks from 9 o'clock.</span></button>
+          <button type="button" data-st="waistR"><span class="t">RIGHT WAIST</span><span class="d">Single .50 at the starboard window. Beam attacks from 3 o'clock.</span></button>
         </div>
       </div>
 
@@ -1380,7 +1399,13 @@
               wingmen: [[-40, -15, -112], [46, -25, -140]], approach: 'front', struts: false },
       ball: { title: 'SPERRY BALL TURRET', radar: ['BALL TURRET SECTOR SCOPE', "6 O'CLOCK LOW SCAN"],
               eye: new THREE.Vector3(0, -3.25, -12.2), baseYaw: 0, basePitch: -0.12, yawRange: 0.55, pitchRange: 0.42,
-              wingmen: [[-36, 10, 70], [42, 17, 92]], approach: 'below', struts: false }
+              wingmen: [[-36, 10, 70], [42, 17, 92]], approach: 'below', struts: false },
+      waist: { title: 'LEFT WAIST GUN', radar: ['WAIST STATION SECTOR', "9 O'CLOCK BEAM SCAN"],
+              eye: new THREE.Vector3(-1.2, 0.2, -9.5), baseYaw: -Math.PI / 2, basePitch: 0.02, yawRange: 0.6, pitchRange: 0.4,
+              wingmen: [[-55, 22, 70], [-80, -26, -75]], approach: 'side', side: -1, single: true, struts: false },
+      waistR: { title: 'RIGHT WAIST GUN', radar: ['WAIST STATION SECTOR', "3 O'CLOCK BEAM SCAN"],
+              eye: new THREE.Vector3(1.2, 0.2, -9.5), baseYaw: Math.PI / 2, basePitch: 0.02, yawRange: 0.6, pitchRange: 0.4,
+              wingmen: [[55, 22, 70], [80, -26, -75]], approach: 'side', side: 1, single: true, struts: false }
     };
     let station = STATIONS.tail;
     const stationForward = new THREE.Vector3(0, 0, 1);   // flat facing direction of the current station
@@ -1407,13 +1432,27 @@
       const L = box.max.z - box.min.z;
       STATIONS.top.eye.set(0, box.min.y + 5.12 * (L / 23.08), box.min.z + 0.227 * L);  // just above the dome
       STATIONS.ball.eye.set(0, box.min.y + 1.34 * (L / 23.08), box.min.z + 0.487 * L);
+      // Left waist window: port side of the fuselage, just aft of the ball turret
+      STATIONS.waist.eye.set(0.5 * (box.min.x + box.max.x) - 1.15 * (L / 23.08),
+                             box.min.y + 3.1 * (L / 23.08), box.min.z + 0.58 * L);
+      const span = box.max.x - box.min.x, cx = 0.5 * (box.min.x + box.max.x);
+      engineSpots.length = 0;
+      [-0.3, -0.15, 0.15, 0.3].forEach(f => engineSpots.push(new THREE.Vector3(cx + f * span, box.min.y + 2.7 * (L / 23.08), box.min.z + 0.36 * L)));
+      STATIONS.waistR.eye.copy(STATIONS.waist.eye);
+      STATIONS.waistR.eye.x = 2 * (0.5 * (box.min.x + box.max.x)) - STATIONS.waist.eye.x;   // mirrored to starboard
     }
 
     function applyStation(id) {
       locateTurretEyes();
       station = STATIONS[id] || STATIONS.tail;
-      document.body.classList.remove('station-tail', 'station-top', 'station-ball');
-      document.body.classList.add(`station-${id}`);
+      document.body.classList.remove('station-tail', 'station-top', 'station-ball', 'station-waist');
+      document.body.classList.add(`station-${id === 'waistR' ? 'waist' : id}`);
+      // Waist positions swing a single hand-held M2 on a post mount; the turrets carry twin guns
+      leftBrowning.gun.position.x = station.single ? 0 : -0.24;
+      leftFlash.group.position.x = station.single ? 0 : -0.24;
+      rightBrowning.gun.visible = rightFlash.group.visible = !station.single;
+      document.getElementById('hud-gun-name').textContent =
+        station.single ? 'SINGLE .50-CAL M2 BROWNING (850 RPM)' : 'TWIN .50-CAL M2 BROWNING (850 RPM)';
       stationForward.set(Math.sin(station.baseYaw), 0, Math.cos(station.baseYaw)).normalize();
       stationRight.set(-Math.cos(station.baseYaw), 0, Math.sin(station.baseYaw));
 
@@ -1442,7 +1481,7 @@
       document.getElementById('hud-station-title').textContent = station.title;
       document.getElementById('radar-title').textContent = station.radar[0];
       document.getElementById('radar-sub').textContent = station.radar[1];
-      document.getElementById('station-frame').innerHTML = stationFrameSVG(id);
+      document.getElementById('station-frame').innerHTML = stationFrameSVG(id === 'waistR' ? 'waist' : id);
     }
 
     function viewDir(yaw, pitch) {
@@ -1466,6 +1505,14 @@
           <circle cx="0" cy="0" r="50" stroke="#0b1210" stroke-width="3" fill="none"/>
           <circle cx="0" cy="0" r="48.5" stroke="rgba(160,190,200,0.25)" stroke-width="0.5" fill="none"/>
           <path d="M-50 0 L-41 0 M41 0 L50 0" stroke="#0b1210" stroke-width="2.4"/>
+        </svg>`;
+      }
+      if (id === 'waist') {
+        // Open waist window: fuselage frame around the hatch
+        return `<svg width="100%" height="100%" viewBox="0 0 100 100" preserveAspectRatio="none">
+          <path d="M0 0 H100 V100 H0 Z M12 14 V86 H88 V14 Z" fill="#0d1411" fill-rule="evenodd" opacity="0.94"/>
+          <path d="M12 14 H88 V86 H12 Z" stroke="#1d2a24" stroke-width="1.2" fill="none"/>
+          <path d="M12 50 H4 M88 50 H96" stroke="#25332c" stroke-width="2.2"/>
         </svg>`;
       }
       return '';
@@ -1834,6 +1881,7 @@
 
     // High-altitude engine condensation trails streaming aft from our B-17's 4 engines
     const contrailParticles = [];
+    const scudWisps = [];
     const contrailGeo = new THREE.SphereGeometry(0.65, 6, 6);
     const contrailMat = new THREE.MeshBasicMaterial({
       color: 0xf1f5f9,
@@ -1842,6 +1890,7 @@
       depthWrite: false
     });
     const engineXOffsets = [-9.5, -4.5, 4.5, 9.5];
+    const engineSpots = [];   // real engine positions on the model (filled once it loads)
 
     function spawnContrailPuffs() {
       for (let i = 0; i < 4; i++) {
@@ -1854,11 +1903,17 @@
           depthWrite: false
         }));
         mesh.scale.setScalar(2.4);
-        mesh.position.set(
-          engineXOffsets[i] + (Math.random() - 0.5) * 0.4,
-          -1.1 + (Math.random() - 0.5) * 0.3,
-          2.0
-        );
+        if (station.single && engineSpots[i]) {
+          // From the waist the trails start at the engines themselves, so they visibly stream aft past the window
+          mesh.position.copy(engineSpots[i]).add(new THREE.Vector3((Math.random() - 0.5) * 0.4, (Math.random() - 0.5) * 0.3, 2));
+          mesh.scale.setScalar(1.4);
+        } else {
+          mesh.position.set(
+            engineXOffsets[i] + (Math.random() - 0.5) * 0.4,
+            -1.1 + (Math.random() - 0.5) * 0.3,
+            2.0
+          );
+        }
         scene.add(mesh);
         contrailParticles.push({
           mesh,
@@ -2255,6 +2310,17 @@
         points[1].y = 18 + Math.random() * 30;
         points[2].y = 4 + Math.random() * 16;
         points[3].y = -40 - Math.random() * 60;
+      } else if (station.approach === 'side') {
+        // Beam pass seen from the waist: fighters run in from 12 or 6 o'clock along our flank, so they cross
+        // the window side-on, firing as they slide past abeam, then carry on and break away the other end.
+        const s = station.side;
+        const fromFront = Math.random() < 0.5;
+        const dz = fromFront ? -1 : 1;                 // -Z is ahead of us
+        const r = Math.random;
+        points[0].set(s * (150 + r() * 140), 40 + r() * 110 - (fromFront ? 0 : 60), dz * (620 + r() * 160));
+        points[1].set(s * (75 + r() * 55), 6 + r() * 40, dz * (200 + r() * 90));
+        points[2].set(s * (45 + r() * 35), -10 + r() * 28, -dz * (15 + r() * 60));
+        points[3].set(s * (110 + r() * 160), -70 - r() * 70, -dz * (420 + r() * 180));
       } else if (station.approach === 'below') {
         // Climbing in from 6 o'clock low, then breaking away below
         points[0].y = -(50 + Math.random() * 100);
@@ -2310,39 +2376,112 @@
       });
     }
 
-    function spawnExplosion(position, scale = 1.0) {
+    // Layered airburst: a white-hot flash, a rolling fireball that cools from yellow to dull red, oily black smoke
+    // that hangs in the air and streams aft in our slipstream, and tumbling metal debris trailing smoke and sparks.
+    // inheritVel: the exploding aircraft's velocity, so the wreckage keeps moving the way it was flying.
+    const AIR_DRIFT = new THREE.Vector3(0, 0, 62);    // still air streams aft relative to our bomber
+    const debrisGeos = [new THREE.BoxGeometry(1, 0.08, 0.5), new THREE.BoxGeometry(0.6, 0.06, 1.2), new THREE.TetrahedronGeometry(0.5)];
+    const debrisMat = new THREE.MeshStandardMaterial({ color: 0x4a4f48, roughness: 0.6, metalness: 0.5 });
+    function fxSprite(tex, color, additive, opacity) {
+      const mat = new THREE.SpriteMaterial({ map: tex, color, transparent: true, opacity, depthWrite: false,
+        blending: additive ? THREE.AdditiveBlending : THREE.NormalBlending });
+      mat.rotation = Math.random() * Math.PI * 2;
+      return new THREE.Sprite(mat);
+    }
+    function randDir() {
+      const th = Math.random() * Math.PI * 2, ph = Math.acos(2 * Math.random() - 1);
+      return new THREE.Vector3(Math.sin(ph) * Math.cos(th), Math.sin(ph) * Math.sin(th), Math.cos(ph));
+    }
+    function spawnExplosion(position, scale = 1.0, inheritVel = null) {
       sound.playExplosion(scale);
-      const count = Math.floor(24 * scale);
-      for (let i = 0; i < count; i++) {
-        const isFire = i < count * 0.65;
-        const r = (0.7 + Math.random() * 1.4) * scale;
-        const mat = new THREE.MeshBasicMaterial({
-          color: isFire ? (Math.random() < 0.5 ? 0xffbe0b : 0xfb5607) : 0x2b2d42,
-          transparent: true,
-          opacity: 1
-        });
-        const mesh = new THREE.Mesh(unitPuffGeo, mat);
-        mesh.scale.setScalar(r);
-        mesh.position.copy(position);
+      const base = inheritVel ? inheritVel.clone().multiplyScalar(0.6) : new THREE.Vector3();
+      const tex = () => cloudTextures[Math.floor(Math.random() * cloudTextures.length)];
+      const push = (obj, o) => { obj.position.copy(position); scene.add(obj); explosionParticles.push({ obj, age: 0, ...o }); };
 
-        const speed = (12 + Math.random() * 36) * scale;
-        const theta = Math.random() * Math.PI * 2;
-        const phi = Math.acos(2 * Math.random() - 1);
-        const vel = new THREE.Vector3(
-          speed * Math.sin(phi) * Math.cos(theta),
-          speed * Math.sin(phi) * Math.sin(theta),
-          speed * Math.cos(phi)
-        );
+      // 1. Flash: very short, bright, barely bigger than the airplane
+      push(fxSprite(tex(), 0xfff6d8, true, 0.9), { kind: 'flash', vel: base.clone(), life: 0.1, s0: 5 * scale, s1: 11 * scale });
 
-        scene.add(mesh);
-        explosionParticles.push({
-          mesh,
-          mat,
-          vel,
-          r,
-          age: 0,
-          maxAge: 0.55 + Math.random() * 0.55
-        });
+      // 2. Fireball: a cluster of overlapping blobs, not a burst of confetti
+      const nFire = Math.round(9 * scale);
+      for (let i = 0; i < nFire; i++) {
+        const v = base.clone().addScaledVector(randDir(), (3 + Math.random() * 9) * scale);
+        push(fxSprite(tex(), 0xffc46b, false, 1), { kind: 'fire', vel: v, life: 0.45 + Math.random() * 0.5,
+          s0: (2.5 + Math.random() * 2.5) * scale, s1: (7 + Math.random() * 6) * scale, drag: 2.2 });
+      }
+
+      // 3. Smoke: starts inside the fireball, outlives it, slows to the air and drifts aft
+      const nSmoke = Math.round(10 * scale);
+      for (let i = 0; i < nSmoke; i++) {
+        const v = base.clone().addScaledVector(randDir(), (2 + Math.random() * 7) * scale);
+        const grey = 0x1c1d1b + Math.floor(Math.random() * 3) * 0x080808;
+        push(fxSprite(tex(), grey, false, 0), { kind: 'smoke', vel: v, life: 2.6 + Math.random() * 2.2, delay: 0.08 + Math.random() * 0.25,
+          s0: (3 + Math.random() * 2) * scale, s1: (13 + Math.random() * 9) * scale, drag: 1.1, peak: 0.55 + Math.random() * 0.25 });
+      }
+
+      // 4. Debris: tumbling panels, some burning, falling and trailing smoke
+      const nDebris = Math.round(8 * scale);
+      for (let i = 0; i < nDebris; i++) {
+        const m = new THREE.Mesh(debrisGeos[i % debrisGeos.length], debrisMat);
+        m.scale.setScalar((0.6 + Math.random() * 1.2) * Math.min(1.5, scale));
+        const v = base.clone().addScaledVector(randDir(), (10 + Math.random() * 26) * scale);
+        push(m, { kind: 'debris', vel: v, life: 2.5 + Math.random() * 1.5, grav: 22, drag: 0.35,
+          spin: new THREE.Vector3((Math.random() - 0.5) * 14, (Math.random() - 0.5) * 14, (Math.random() - 0.5) * 14),
+          burning: Math.random() < 0.45, trailT: 0 });
+      }
+
+      // 5. Sparks: quick hot fragments arcing out
+      const nSpark = Math.round(14 * scale);
+      for (let i = 0; i < nSpark; i++) {
+        const v = base.clone().addScaledVector(randDir(), (25 + Math.random() * 40) * scale);
+        push(fxSprite(tex(), 0xffd27a, true, 1), { kind: 'spark', vel: v, life: 0.35 + Math.random() * 0.45, grav: 30, drag: 1.2,
+          s0: 0.7, s1: 0.25 });
+      }
+    }
+
+    function updateExplosionFx(dt) {
+      for (let i = explosionParticles.length - 1; i >= 0; i--) {
+        const p = explosionParticles[i];
+        p.age += dt;
+        if (p.delay && p.age < p.delay) { p.obj.material.opacity = 0; continue; }
+        const t = (p.age - (p.delay || 0)) / p.life;
+        if (t >= 1) {
+          scene.remove(p.obj);
+          if (p.kind !== 'debris') p.obj.material.dispose();
+          explosionParticles.splice(i, 1);
+          continue;
+        }
+        if (p.drag) {
+          // Everything slows towards the air around it, which is streaming aft past us
+          const k = 1 - Math.exp(-p.drag * dt);
+          p.vel.lerp(AIR_DRIFT, k);
+        }
+        if (p.grav) p.vel.y -= p.grav * dt;
+        p.obj.position.addScaledVector(p.vel, dt);
+        const ease = 1 - Math.pow(1 - t, 2.2);
+        if (p.kind === 'debris') {
+          p.obj.rotation.x += p.spin.x * dt; p.obj.rotation.y += p.spin.y * dt; p.obj.rotation.z += p.spin.z * dt;
+          p.trailT -= dt;
+          if (p.trailT <= 0 && t < 0.8) {
+            p.trailT = p.burning ? 0.05 : 0.11;
+            spawnSmokePuff(p.obj.position, !p.burning || Math.random() < 0.5, 0.7, 0.35);
+          }
+          continue;
+        }
+        p.obj.scale.setScalar(p.s0 + (p.s1 - p.s0) * ease);
+        const mat = p.obj.material;
+        if (p.kind === 'flash') {
+          mat.opacity = 1 - t;
+        } else if (p.kind === 'fire') {
+          // Yellow-white core cooling through orange to a dull red as it dies
+          mat.color.setRGB(1, 0.85 - 0.55 * t, 0.55 - 0.5 * t);
+          mat.opacity = t < 0.15 ? 1 : Math.max(0, 1 - (t - 0.15) / 0.85);
+          mat.rotation += dt * 0.6;
+        } else if (p.kind === 'smoke') {
+          mat.opacity = p.peak * Math.min(1, t * 6) * (1 - t);
+          mat.rotation += dt * 0.15;
+        } else if (p.kind === 'spark') {
+          mat.opacity = 1 - t;
+        }
       }
     }
 
@@ -2403,7 +2542,7 @@
         state.kills++;
         hudKillsEl.textContent = String(state.kills);
       }
-      spawnExplosion(f.mesh.position, 1.15);
+      spawnExplosion(f.mesh.position, 1.15, f.velocity);
       f.deathVel.copy(f.velocity).multiplyScalar(0.55);
       f.deathVel.y -= 12;
       f.deathSpin.set(
@@ -2780,12 +2919,14 @@
     const STATION_BRIEF = {
       tail: 'You\'re in the Cheyenne tail turret of "Iron Maiden", facing aft',
       top: 'You\'re in the Sperry top turret of "Iron Maiden", facing forward over the nose',
-      ball: 'You\'re curled up in the Sperry ball turret under "Iron Maiden"\'s belly'
+      ball: 'You\'re curled up in the Sperry ball turret under "Iron Maiden"\'s belly',
+      waist: 'You\'re standing at the left waist window of "Iron Maiden" with a single .50, wind howling through the open hatch',
+      waistR: 'You\'re standing at the right waist window of "Iron Maiden" with a single .50, wind howling through the open hatch'
     };
     function setStartLabel() {
       const cur = career.station || 'tail';
       document.getElementById('btn-start-mission').textContent =
-        cur === 'top' ? 'MAN THE TOP TURRET' : cur === 'ball' ? 'MAN THE BALL TURRET' : 'MAN THE TAIL GUN';
+        cur === 'top' ? 'MAN THE TOP TURRET' : cur === 'ball' ? 'MAN THE BALL TURRET' : cur === 'waist' ? 'MAN THE LEFT WAIST GUN' : cur === 'waistR' ? 'MAN THE RIGHT WAIST GUN' : 'MAN THE TAIL GUN';
     }
     function refreshStationPicker() {
       const cur = career.station || 'tail';
@@ -3318,7 +3459,7 @@
       debriefEl.innerHTML = `
         <div class="db-kicker">381st Bomb Group // Mission ${m.number}</div>
         <div class="db-title">MISSION DEBRIEF</div>
-        <div class="db-sub">${m.name} — ${m.target}. ${d.bomb ? `Bombing: <b style="color:${d.bomb.grade === 'Missed' ? '#f87171' : d.bomb.grade === 'Near miss' ? '#fcd34d' : '#86efac'}">${d.bomb.grade}</b> (${d.bomb.grade === 'Direct hits' ? 'dead centre' : d.bomb.yards + ' yds ' + d.bomb.dir}).` : 'Bombs on target.'} ${WEATHER[m.weather].label}.</div>
+        <div class="db-sub">${m.name} — ${m.target}. ${d.bomb ? `Bombing: <b style="color:${d.bomb.grade === 'Missed' ? '#f87171' : d.bomb.grade === 'Near miss' ? '#fcd34d' : '#86efac'}">${d.bomb.grade}</b> (${d.bomb.inTarget !== undefined ? d.bomb.inTarget + '/10 on target' + (d.bomb.flakHits ? ', ' + d.bomb.flakHits + ' flak hits' : '') : (d.bomb.grade === 'Direct hits' ? 'dead centre' : d.bomb.yards + ' yds ' + d.bomb.dir)}).` : 'Bombs on target.'} ${WEATHER[m.weather].label}.</div>
         ${promo}
         <div class="db-grid">
           <div class="db-stat"><div class="k">Fighters you shot down</div><div class="v">${d.kills}</div></div>
@@ -3452,13 +3593,14 @@
     // ======================= BOMB RUN: NORDEN BOMBSIGHT =======================
     const BS_H = 900;          // height of the sight above the ground (game units)
     const BS_SPEED = 75;       // ground speed in the sight (units/s)
-    const BS_RUN = 13;         // seconds from start of the run to the target
+    const BS_RUN = 16;         // seconds from start of the run to the target
     const bsight = { active: false, scene: null, cam: null, group: null, areaMesh: null, t: 0, dropped: false, dropT: 0,
-                     armed: false, wind: 0, bombs: [], flak: [], flakTimer: 0, clouds: [], ending: false, onDone: null };
+                     armed: false, wind: 0, gust: 0, crab: 0, shake: 0, flakHits: 0, bombs: [], fx: [], flak: [], lookAt: null, impactLocal: null, flakTimer: 0, clouds: [], ending: false, onDone: null };
     const bsUI = {
       away: document.getElementById('bs-away'), range: document.getElementById('bs-range'),
       drift: document.getElementById('bs-drift'), target: document.getElementById('bs-target'),
-      mark: document.getElementById('bs-steer-mark')
+      mark: document.getElementById('bs-steer-mark'), steerIn: document.getElementById('bs-steer-in'),
+      needle: document.getElementById('bs-needle'), root: document.getElementById('bombsight-ui')
     };
 
     function targetKind(target) {
@@ -3564,9 +3706,16 @@
         const side = Math.random() < 0.5 ? -1 : 1;
         bsight.group.position.set(side * (60 + Math.random() * 110), 0, -BS_SPEED * BS_RUN);
         bsight.wind = (Math.random() < 0.5 ? -1 : 1) * (5 + Math.random() * 9) * (DIFFICULTY.windScale || 1);
+        bsight.gust = 0;
+        bsight.crab = 0;            // heading correction the bombardier has put in (units/s across the ground)
+        bsight.shake = 0;
+        bsight.flakHits = 0;
+        bsight.impactLocal = null;
         bsight.t = 0; bsight.dropped = false; bsight.armed = false; bsight.ending = false; bsight.onDone = onDone;
-        bsight.bombs.forEach(b => bsight.scene.remove(b)); bsight.bombs = [];
+        bsight.bombs.forEach(b => bsight.group.remove(b.mesh)); bsight.bombs = [];
+        bsight.fx.forEach(f => bsight.group.remove(f.sprite)); bsight.fx = [];
         bsight.flak.forEach(f => bsight.scene.remove(f.sprite)); bsight.flak = [];
+        bsight.flakTimer = 1.2;
         bsight.clouds.forEach(c => bsight.group.remove(c)); bsight.clouds = [];
         const nClouds = { clear: 0, scattered: 6, broken: 14 }[m.weather];
         for (let i = 0; i < nClouds; i++) {
@@ -3576,6 +3725,9 @@
           bsight.group.add(sp);
           bsight.clouds.push(sp);
         }
+        bsight.cam.position.set(0, BS_H, 0);
+        bsight.lookAt = new THREE.Vector3(0, 0, 0);
+        bsight.cam.lookAt(bsight.lookAt);
         bsUI.target.textContent = `${m.name.toUpperCase()}`;
         bsUI.away.classList.remove('show');
         updateBombsightCamAspect();
@@ -3596,29 +3748,100 @@
     function updateBombsight(dt) {
       bsight.t += dt;
       const grp = bsight.group;
-      // Steering: deflect the mouse / drag (or A-D keys) left or right of centre to correct course
+
+      // Killing the drift: the stick turns the airplane, it doesn't slide it. Steering changes the crab angle,
+      // so a held deflection keeps building drift; centre the stick once the target stops wandering.
       const steer = THREE.MathUtils.clamp(state.pointerNDC.x * 1.4 + (state.keySteer || 0), -1, 1);
-      if (!bsight.dropped) grp.position.x -= steer * 55 * dt;
-      grp.position.x += bsight.wind * dt;
+      if (!bsight.dropped) bsight.crab = THREE.MathUtils.clamp(bsight.crab + steer * 24 * dt, -45, 45);
+      // Slowly wandering gusts so the drift never stays killed on its own
+      bsight.gust += ((Math.random() - 0.5) * 9 - bsight.gust * 0.6) * dt;
+      const drift = bsight.wind + bsight.gust - bsight.crab;    // + : ground (and target) sliding right in the sight
+      if (!bsight.dropped) grp.position.x += drift * dt;
       grp.position.z += BS_SPEED * dt;
-      bsUI.mark.style.left = `${50 + steer * 46}%`;
+
+      const ttr = -grp.position.z / BS_SPEED;                     // seconds until the target is under the crosshair
+      bsUI.mark.style.left = `${50 + THREE.MathUtils.clamp(drift / 20, -1, 1) * 46}%`;
+      bsUI.steerIn.style.left = `${50 + steer * 46}%`;
       bsUI.range.textContent = `${Math.max(0, -grp.position.z / 300).toFixed(1)} MI`;
-      bsUI.drift.textContent = bsight.wind > 0 ? 'WIND FROM LEFT ▸' : '◂ WIND FROM RIGHT';
+      const killed = Math.abs(drift) < 1.5;
+      bsUI.drift.textContent = killed ? 'KILLED' : `${Math.abs(drift).toFixed(0)} ${drift > 0 ? 'RIGHT' : 'LEFT'}`;
+      bsUI.drift.style.color = killed ? '#86efac' : '';
+      // Release needle sweeps down the rate scale and meets the index when the target reaches the crosshair
+      bsUI.needle.style.top = `${50 - THREE.MathUtils.clamp(ttr / 8, -0.35, 1) * 46}%`;
+      bsUI.needle.classList.toggle('hot', Math.abs(ttr) < 0.35);
 
       // Release: wait for the trigger to be let go once (no accidental drop from held fire), then any press drops
       if (!state.isFiring && bsight.t > 1.0) bsight.armed = true;
       if (!bsight.dropped && ((bsight.armed && state.isFiring) || grp.position.z > 140)) releaseBombs();
 
-      // Flak bursting between us and the ground
+      updateBombsightFlak(dt);
+
+      // After the drop, the sight swings back to follow the stick down to the ground
+      if (bsight.dropped && bsight.impactLocal) {
+        const k = Math.min(1, (bsight.t - bsight.dropT) / 2.2);
+        const target = grp.localToWorld(bsight.impactLocal.clone());
+        bsight.lookAt.set(0, 0, 0).lerp(target, k * k * (3 - 2 * k));
+      }
+      bsight.shake = Math.max(0, bsight.shake - dt * 2.2);
+      const sh = bsight.shake * bsight.shake * 9;
+      bsight.cam.position.set((Math.random() - 0.5) * sh, BS_H + (Math.random() - 0.5) * sh, (Math.random() - 0.5) * sh);
+      bsight.cam.lookAt(bsight.lookAt);
+
+      // The stick falling away and bursting across the ground
+      for (let i = bsight.bombs.length - 1; i >= 0; i--) {
+        const b = bsight.bombs[i];
+        const f = (bsight.t - b.t0) / b.fall;
+        if (f < 0) continue;
+        b.mesh.visible = true;
+        if (f < 1) {
+          b.mesh.position.set(b.end.x, (BS_H - 14) * (1 - f * f), b.end.z);
+        } else {
+          bsight.group.remove(b.mesh);
+          bsight.bombs.splice(i, 1);
+          bombBurst(b.end, b.onTarget);
+        }
+      }
+      for (let i = bsight.fx.length - 1; i >= 0; i--) {
+        const e = bsight.fx[i];
+        e.age += dt;
+        const a = e.age / e.life;
+        if (e.kind === 'flash') {
+          e.sprite.scale.setScalar(e.size * (0.6 + a * 1.4));
+          e.sprite.material.opacity = Math.max(0, 1 - a);
+        } else if (e.kind === 'smoke') {
+          e.sprite.scale.setScalar(e.size * (0.4 + a * 1.6));
+          e.sprite.position.x += 6 * dt;   // drifting with the wind
+          e.sprite.material.opacity = Math.max(0, 0.8 * (1 - a));
+        } else {                           // fire: flickers and keeps burning
+          e.sprite.scale.setScalar(e.size * (0.85 + Math.random() * 0.3) * Math.min(1, e.age * 2));
+          e.sprite.material.opacity = 0.65 + Math.random() * 0.3;
+        }
+        if (e.age > e.life) { bsight.group.remove(e.sprite); e.sprite.material.dispose(); bsight.fx.splice(i, 1); }
+      }
+
+      if (bsight.dropped && !bsight.ending && bsight.t - bsight.dropT > 9.5) endBombRun();
+    }
+
+    // Flak: the longer the run, the closer the gunners below get. Near bursts shake the sight and hole the airplane.
+    const BS_PLANE = new THREE.Vector3(0, BS_H, 0);
+    function updateBombsightFlak(dt) {
       bsight.flakTimer -= dt;
       if (bsight.flakTimer <= 0 && !bsight.ending) {
-        bsight.flakTimer = 0.5 + Math.random() * 0.8;
+        const rampUp = Math.min(1, bsight.t / BS_RUN);
+        bsight.flakTimer = Math.max(0.22, 0.9 - rampUp * 0.6) + Math.random() * 0.5;
+        const close = !bsight.dropped && Math.random() < 0.1 + rampUp * 0.25;
         const sp = new THREE.Sprite(new THREE.SpriteMaterial({ map: cloudTextures[Math.floor(Math.random() * 4)], color: 0x222426, transparent: true, opacity: 0.85, depthWrite: false }));
-        sp.position.set((Math.random() - 0.5) * 520, BS_H - 140 - Math.random() * 450, (Math.random() - 0.5) * 520);
+        if (close) sp.position.set((Math.random() - 0.5) * 170, BS_H - 30 - Math.random() * 60, (Math.random() - 0.5) * 170);
+        else sp.position.set((Math.random() - 0.5) * 520, BS_H - 140 - Math.random() * 450, (Math.random() - 0.5) * 520);
         sp.scale.setScalar(25);
         bsight.scene.add(sp);
         bsight.flak.push({ sprite: sp, age: 0 });
-        if (Math.random() < 0.45) sound.playExplosion(0.3);
+        if (close) {
+          sound.playExplosion(0.55);
+          const d = sp.position.distanceTo(BS_PLANE);
+          if (d < 90) flakHit(1 - d / 90);
+          else bsight.shake = Math.max(bsight.shake, 0.35);
+        } else if (Math.random() < 0.45) sound.playExplosion(0.3);
       }
       for (let i = bsight.flak.length - 1; i >= 0; i--) {
         const f = bsight.flak[i];
@@ -3628,15 +3851,39 @@
         f.sprite.material.opacity = Math.max(0, 0.85 * (1 - f.age / 2.5));
         if (f.age > 2.5) { bsight.scene.remove(f.sprite); f.sprite.material.dispose(); bsight.flak.splice(i, 1); }
       }
+    }
 
-      // Our stick of bombs falling away under the aircraft
-      for (const b of bsight.bombs) {
-        b.userData.vy += 70 * dt;
-        b.position.y -= b.userData.vy * dt;
-        b.position.z += b.userData.trail * dt;
-      }
+    function flakHit(severity) {
+      // Damage carries on into the rest of the mission, but flak alone can't bring us down during the run
+      const dmg = Math.round((3 + severity * 9) * ENEMY_DAMAGE_SCALE);
+      const dealt = Math.max(0, Math.min(dmg, state.health - 12));
+      state.health -= dealt;
+      state.stats.hitsTaken++;
+      state.stats.damageTaken += dealt;
+      updateHealthUI();
+      sound.playHullHit();
+      buzz(60);
+      bsight.shake = 1;
+      bsight.crab += (Math.random() - 0.5) * 14 * severity;   // the jolt knocks the airplane off its heading
+      bsUI.root.classList.remove('flak-hit'); void bsUI.root.offsetWidth; bsUI.root.classList.add('flak-hit');
+      if (++bsight.flakHits === 1) showRadio('PILOT', "Flak hit! She's still flying. Stay on the sight!", 2600);
+    }
 
-      if (bsight.dropped && !bsight.ending && bsight.t - bsight.dropT > 3.2) endBombRun();
+    function bombBurst(p, onTarget) {
+      const add = (kind, map, color, size, life, additive, y) => {
+        const sp = new THREE.Sprite(new THREE.SpriteMaterial({ map, color, transparent: true, depthWrite: false,
+          blending: additive ? THREE.AdditiveBlending : THREE.NormalBlending }));
+        sp.position.set(p.x + (Math.random() - 0.5) * 6, y, p.z + (Math.random() - 0.5) * 6);
+        sp.scale.setScalar(size);
+        bsight.group.add(sp);
+        bsight.fx.push({ sprite: sp, kind, size, life, age: 0 });
+      };
+      const tex = () => cloudTextures[Math.floor(Math.random() * 4)];
+      add('flash', tex(), 0xffb347, 85, 0.8, true, 4);
+      add('smoke', tex(), 0x3a3631, 90, 7, false, 8);
+      if (onTarget) add('fire', tex(), 0xff6a1a, 42, 60, true, 2);
+      if (Math.random() < 0.5) sound.playExplosion(0.4);
+      bsight.shake = Math.max(bsight.shake, 0.15);
     }
 
     function releaseBombs() {
@@ -3648,28 +3895,38 @@
       const miss = Math.hypot(dx, dz);
       const dir = Math.abs(dz) >= Math.abs(dx) ? (dz < 0 ? 'short' : 'long') : (dx > 0 ? 'left' : 'right');
       const yards = Math.round(miss * 2);
-      const m = state.mission;
-      let grade, line;
-      if (miss <= 20)       { grade = 'Direct hits';  line = `Shacked it! Bombs right on the ${m.target}!`; }
-      else if (miss <= 50)  { grade = 'On target';    line = `Good bombs — hits all over the target area.`; }
-      else if (miss <= 110) { grade = 'Near miss';    line = `Near miss — the stick fell ${dir} and only clipped the edge of the target.`; }
-      else                  { grade = 'Missed';       line = `Missed — the bombs fell well ${dir} of the target.`; }
-      state.bombResult = { grade, line, yards, dir };
-      // the stick: ten bombs leaving the bay one after another
+      // Impact point in ground (group) coordinates; the target sits at the group origin
+      bsight.impactLocal = new THREE.Vector3(-dx, 0, -dz);
+      // The stick: ten bombs walking across the ground along the line of flight, plus a little scatter
       const geo = new THREE.CylinderGeometry(0.9, 0.9, 5, 8);
       const mat = new THREE.MeshLambertMaterial({ color: 0x2f3a2c });
+      const TARGET_R = 70;
+      let inTarget = 0;
       for (let i = 0; i < 10; i++) {
-        const b = new THREE.Mesh(geo, mat);
-        b.position.set((Math.random() - 0.5) * 3, BS_H - 14 - i * 3, i * 2.2);
-        b.userData = { vy: 4 + i * 2.5, trail: 2 + i * 0.6 };
-        bsight.scene.add(b);
-        bsight.bombs.push(b);
+        const end = new THREE.Vector3(-dx + (Math.random() - 0.5) * 14, 0, -dz + 45 - i * 10 + (Math.random() - 0.5) * 6);
+        const onTarget = Math.hypot(end.x, end.z) < TARGET_R;
+        if (onTarget) inTarget++;
+        const mesh = new THREE.Mesh(geo, mat);
+        mesh.visible = false;
+        bsight.group.add(mesh);
+        bsight.bombs.push({ mesh, end, onTarget, t0: bsight.t + i * 0.12, fall: 4.4 });
       }
+      const m = state.mission;
+      let grade, line;
+      if (inTarget >= 8)      { grade = 'Direct hits';  line = `Shacked it! ${inTarget} of 10 right on the ${m.target}!`; }
+      else if (inTarget >= 4) { grade = 'On target';    line = `Good bombs: ${inTarget} of 10 in the target area.`; }
+      else if (inTarget >= 1) { grade = 'Near miss';    line = `Near miss: the stick fell ${dir}, only ${inTarget} of 10 on the target.`; }
+      else                    { grade = 'Missed';       line = `Missed: the bombs fell well ${dir} of the target.`; }
+      state.bombResult = { grade, line, yards, dir, inTarget, flakHits: bsight.flakHits };
       bsUI.away.classList.add('show');
+      setTimeout(() => bsUI.away.classList.remove('show'), 2200);
       showRadio('BOMBARDIER', 'Bombs away!', 2600);
       sound.playBombWhistle(0.1, 2.8);
       sound.playBombWhistle(0.45, 2.6);
       sound.playBombWhistle(0.8, 3.0);
+      setTimeout(() => {
+        if (bsight.active) showRadio('BOMBARDIER', grade === 'Missed' ? 'Damn, we missed it.' : `${inTarget} of 10 on the target!`, 3000);
+      }, 5800);
     }
 
     function endBombRun() {
@@ -3748,7 +4005,8 @@
     function fireTwinBrownings() {
       if (state.overheated || !state.running) return;
 
-      state.shotsFired += 2;
+      const muzzleSides = station.single ? [0] : [-0.24, 0.24];
+      state.shotsFired += muzzleSides.length;
       state.heat = Math.min(100, state.heat + 3.4);
       if (state.heat >= 100) {
         state.overheated = true;
@@ -3762,7 +4020,6 @@
       raycaster.setFromCamera(state.pointerNDC, camera);
       state.aimWorldPoint.copy(raycaster.ray.origin).addScaledVector(raycaster.ray.direction, 300);
 
-      const muzzleSides = [-0.24, 0.24];
       muzzleSides.forEach((xOff) => {
         const muzzleWorldPos = new THREE.Vector3(xOff, 0.01, 1.85);
         gunRecoilGroup.localToWorld(muzzleWorldPos);
@@ -4082,7 +4339,39 @@
     const killcamKillerEl = document.getElementById('killcam-killer');
 
     // Procedural SVG bullet hole: dark puncture, frosted ring and jagged radial cracks
+    // Waist windows are open hatches: rounds punch through the aluminium skin around the opening instead,
+    // letting daylight through ragged holes with the metal petals bent inward.
+    function addSkinHole() {
+      if (glassDamageEl.children.length >= 16) glassDamageEl.firstElementChild.remove();
+      const size = 22 + Math.random() * 20;
+      // Pick a spot on the panelling around the hatch (the frame bands of the waist SVG)
+      // (mostly the side frames: the top and bottom strips sit under the HUD panels)
+      const band = Math.random() < 0.85 ? Math.floor(Math.random() * 2) : 2;
+      const across = 2 + Math.random() * 8;
+      const [x, y] = band === 0 ? [across, 20 + Math.random() * 62] : band === 1 ? [100 - across, 20 + Math.random() * 62]
+                   : [32 + Math.random() * 36, 88 + Math.random() * 4];
+      const petals = 5 + Math.floor(Math.random() * 4);
+      let pts = '';
+      for (let i = 0; i < petals * 2; i++) {
+        const a = (i / (petals * 2)) * Math.PI * 2 + (Math.random() - 0.5) * 0.4;
+        const rr = i % 2 ? 4 + Math.random() * 2.5 : 8 + Math.random() * 6;
+        pts += `${(Math.cos(a) * rr).toFixed(1)},${(Math.sin(a) * rr).toFixed(1)} `;
+      }
+      const el = document.createElement('div');
+      el.className = 'bullet-hole';
+      el.style.left = `${x}%`;
+      el.style.top = `${y}%`;
+      el.innerHTML = `<svg width="${size}" height="${size}" viewBox="-20 -20 40 40" style="transform: rotate(${Math.random() * 360}deg)">
+        <circle r="15" fill="rgba(0,0,0,0.35)" />
+        <polygon points="${pts}" fill="#8f9a96" stroke="#c9d2cf" stroke-width="0.7" stroke-linejoin="bevel" />
+        <circle r="${(3.2 + Math.random() * 1.6).toFixed(1)}" fill="#f4f1e2" />
+        <circle r="7" fill="rgba(255,250,225,0.18)" />
+      </svg>`;
+      glassDamageEl.appendChild(el);
+    }
+
     function addBulletHole(silent = false) {
+      if (station.single) { addSkinHole(); return; }   // waist positions have no glass
       if (!silent) sound.playGlassCrack();
       if (glassDamageEl.children.length >= 16) glassDamageEl.firstElementChild.remove();
       const size = 46 + Math.random() * 70;
@@ -4515,6 +4804,30 @@
       groundTex.offset.y += (70 * dt) / GROUND_TILE;
       groundTex.offset.x -= (turnSweep * dt) / GROUND_TILE;
 
+      // Scud past the waist window: near wisps sweep front-to-back fast, far ones slowly — reads as our speed
+      if (station.single && !deathCam.active) {
+        state.scudTimer = (state.scudTimer || 0) - dt;
+        if (state.scudTimer <= 0) {
+          state.scudTimer = 0.18 + Math.random() * 0.3;
+          const d = 30 + Math.random() * 380;
+          const sp = new THREE.Sprite(new THREE.SpriteMaterial({ map: cloudTextures[Math.floor(Math.random() * 4)],
+            color: 0xf4f7fa, transparent: true, opacity: 0, depthWrite: false }));
+          sp.position.set(station.eye.x + station.side * d, station.eye.y + (Math.random() - 0.5) * (40 + d * 0.5), -260 - d * 0.4);
+          sp.scale.set(14 + d * 0.22, 6 + d * 0.08, 1);
+          scene.add(sp);
+          scudWisps.push({ sprite: sp, age: 0, peak: 0.16 + Math.random() * 0.22 });
+        }
+      }
+      for (let i = scudWisps.length - 1; i >= 0; i--) {
+        const w = scudWisps[i];
+        w.age += dt;
+        w.sprite.position.z += 92 * dt;
+        w.sprite.position.x += turnSweep * dt;
+        const edge = Math.min(1, w.age / 0.8, (320 - w.sprite.position.z) / 120);
+        w.sprite.material.opacity = w.peak * Math.max(0, edge);
+        if (w.sprite.position.z > 320 || !station.single) { scene.remove(w.sprite); w.sprite.material.dispose(); scudWisps.splice(i, 1); }
+      }
+
       // Contrail streamers
       state.contrailTimer -= dt;
       if (state.contrailTimer <= 0 && !deathCam.active) {
@@ -4851,18 +5164,7 @@
         }
       }
 
-      for (let i = explosionParticles.length - 1; i >= 0; i--) {
-        const ex = explosionParticles[i];
-        ex.age += dt;
-        ex.mesh.position.addScaledVector(ex.vel, dt);
-        ex.mesh.scale.addScalar(1.8 * ex.r * dt);
-        ex.mat.opacity = Math.max(0, 1 - ex.age / ex.maxAge);
-        if (ex.age >= ex.maxAge) {
-          scene.remove(ex.mesh);
-          ex.mat.dispose();
-          explosionParticles.splice(i, 1);
-        }
-      }
+      updateExplosionFx(dt);
 
       // 8. Update K-14 Gyro Sight & Radar Scope
       updateRadarAndGyroSight();
