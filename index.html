@@ -3459,7 +3459,7 @@
       debriefEl.innerHTML = `
         <div class="db-kicker">381st Bomb Group // Mission ${m.number}</div>
         <div class="db-title">MISSION DEBRIEF</div>
-        <div class="db-sub">${m.name} — ${m.target}. ${d.bomb ? `Bombing: <b style="color:${d.bomb.grade === 'Missed' ? '#f87171' : d.bomb.grade === 'Near miss' ? '#fcd34d' : '#86efac'}">${d.bomb.grade}</b> (${d.bomb.inTarget !== undefined ? d.bomb.inTarget + '/10 on target' + (d.bomb.flakHits ? ', ' + d.bomb.flakHits + ' flak hits' : '') : (d.bomb.grade === 'Direct hits' ? 'dead centre' : d.bomb.yards + ' yds ' + d.bomb.dir)}).` : 'Bombs on target.'} ${WEATHER[m.weather].label}.</div>
+        <div class="db-sub">${m.name} — ${m.target}. ${d.bomb ? `Bombing: <b style="color:${d.bomb.grade === 'Missed' ? '#f87171' : d.bomb.grade === 'Near miss' ? '#fcd34d' : '#86efac'}">${d.bomb.grade}</b> (${d.bomb.total ? d.bomb.destroyed + '/' + d.bomb.total + ' ' + d.bomb.noun + ' destroyed' + (d.bomb.flakHits ? ', ' + d.bomb.flakHits + ' flak hits' : '') : d.bomb.inTarget !== undefined ? d.bomb.inTarget + '/10 on target' + (d.bomb.flakHits ? ', ' + d.bomb.flakHits + ' flak hits' : '') : (d.bomb.grade === 'Direct hits' ? 'dead centre' : d.bomb.yards + ' yds ' + d.bomb.dir)}).` : 'Bombs on target.'} ${WEATHER[m.weather].label}.</div>
         ${promo}
         <div class="db-grid">
           <div class="db-stat"><div class="k">Fighters you shot down</div><div class="v">${d.kills}</div></div>
@@ -3594,7 +3594,7 @@
     const BS_H = 900;          // height of the sight above the ground (game units)
     const BS_SPEED = 75;       // ground speed in the sight (units/s)
     const BS_RUN = 16;         // seconds from start of the run to the target
-    const bsight = { active: false, scene: null, cam: null, group: null, areaMesh: null, t: 0, dropped: false, dropT: 0,
+    const bsight = { area: null, areaTex: null, areaCtx: null, burning: [], active: false, scene: null, cam: null, group: null, areaMesh: null, t: 0, dropped: false, dropT: 0,
                      armed: false, wind: 0, gust: 0, crab: 0, shake: 0, flakHits: 0, bombs: [], fx: [], flak: [], lookAt: null, impactLocal: null, flakTimer: 0, clouds: [], ending: false, onDone: null };
     const bsUI = {
       away: document.getElementById('bs-away'), range: document.getElementById('bs-range'),
@@ -3612,6 +3612,9 @@
     }
 
     // The target area as the bombardier sees it: farmland, a town, a river and the target itself at the centre
+    // Target area, painted once per mission. Returns the target's structures (canvas pixels) so bombs can wreck them.
+    // Sun is from the upper left of the texture: everything casts a short shadow down and to the right.
+    const SHADOW = 'rgba(18,20,14,0.45)';
     function drawTargetArea(g, S, kind) {
       const rnd = Math.random;
       g.fillStyle = '#5c6c40'; g.fillRect(0, 0, S, S);
@@ -3620,52 +3623,138 @@
         g.save(); g.translate(rnd() * S, rnd() * S); g.rotate((rnd() - 0.5) * 0.4);
         g.fillStyle = fields[Math.floor(rnd() * fields.length)]; g.fillRect(0, 0, 30 + rnd() * 90, 20 + rnd() * 70); g.restore();
       }
+      // hedgerows and tree lines between the fields
+      g.fillStyle = 'rgba(40,52,28,0.55)';
+      for (let i = 0; i < 260; i++) {
+        const x = rnd() * S, y = rnd() * S, horiz = rnd() < 0.5;
+        for (let k = 0; k < 14; k++) g.fillRect(x + (horiz ? k * 6 : rnd() * 2), y + (horiz ? rnd() * 2 : k * 6), 4, 4);
+      }
       const c = S / 2;
       // river bending past the target
       g.strokeStyle = '#3f5b68'; g.lineWidth = 26; g.lineCap = 'round';
       g.beginPath(); g.moveTo(c - 0.5 * S, c + 0.32 * S); g.bezierCurveTo(c - 0.15 * S, c + 0.05 * S, c + 0.05 * S, c + 0.2 * S, c + 0.5 * S, c - 0.1 * S); g.stroke();
+      g.strokeStyle = 'rgba(160,190,200,0.18)'; g.lineWidth = 6; g.stroke();   // light on the water
       // roads
       g.strokeStyle = 'rgba(205,200,180,0.55)'; g.lineWidth = 4;
       for (let i = 0; i < 6; i++) { g.beginPath(); g.moveTo(rnd() * S, 0); g.lineTo(c + (rnd() - 0.5) * 300, c + (rnd() - 0.5) * 300); g.lineTo(rnd() * S, S); g.stroke(); }
-      // the town around the target
-      for (let i = 0; i < 1400; i++) {
-        const a = rnd() * Math.PI * 2, r = 160 + Math.pow(rnd(), 0.7) * 380;
-        const x = c + Math.cos(a) * r, y = c + Math.sin(a) * r * 0.8;
-        g.fillStyle = rnd() < 0.5 ? '#8c8478' : (rnd() < 0.5 ? '#9a5d48' : '#77716a');
-        g.fillRect(x, y, 6 + rnd() * 8, 6 + rnd() * 8);
+
+      // The town: a ring of street blocks around the works, terraces of roofs with shadows, a few churches
+      for (let i = 0; i < 230; i++) {
+        const a = rnd() * Math.PI * 2, r = 175 + Math.pow(rnd(), 0.7) * 360;
+        const bx = c + Math.cos(a) * r, by = c + Math.sin(a) * r * 0.8;
+        const ang = Math.round(a / (Math.PI / 2)) * (Math.PI / 2) + (rnd() - 0.5) * 0.25;
+        const bw = 26 + rnd() * 30, bh = 20 + rnd() * 22;
+        g.save(); g.translate(bx, by); g.rotate(ang);
+        g.fillStyle = 'rgba(150,145,130,0.6)'; g.fillRect(-bw / 2 - 3, -bh / 2 - 3, bw + 6, bh + 6);   // street edge
+        g.fillStyle = '#5f6a48'; g.fillRect(-bw / 2 + 4, -bh / 2 + 4, bw - 8, bh - 8);                   // back gardens
+        // terraced roofs around the block edge
+        for (let k = 0; k < 2; k++) {
+          const y0 = k ? bh / 2 - 7 : -bh / 2;
+          g.fillStyle = SHADOW; g.fillRect(-bw / 2 + 2, y0 + 2, bw, 7);
+          g.fillStyle = rnd() < 0.6 ? '#94584a' : '#7d786f'; g.fillRect(-bw / 2, y0, bw, 7);
+          g.fillStyle = 'rgba(0,0,0,0.18)'; for (let x = -bw / 2 + 5; x < bw / 2; x += 5 + rnd() * 3) g.fillRect(x, y0, 1, 7);
+        }
+        g.restore();
       }
+      for (let i = 0; i < 4; i++) {
+        const a = rnd() * Math.PI * 2, r = 200 + rnd() * 250, x = c + Math.cos(a) * r, y = c + Math.sin(a) * r * 0.8;
+        g.fillStyle = SHADOW; g.fillRect(x - 12 + 4, y - 4 + 4, 24, 8); g.fillRect(x - 4 + 4, y - 12 + 4, 8, 24);
+        g.fillStyle = '#8a857b'; g.fillRect(x - 12, y - 4, 24, 8); g.fillRect(x - 4, y - 12, 8, 24);
+      }
+
       // clear ground around the target so it reads clearly
-      g.fillStyle = '#6d6a5c'; g.fillRect(c - 150, c - 120, 300, 240);
-      g.fillStyle = 'rgba(0,0,0,0.35)';
+      g.fillStyle = '#6d6a5c'; g.fillRect(c - 160, c - 130, 320, 260);
+      g.fillStyle = 'rgba(0,0,0,0.08)'; for (let i = 0; i < 80; i++) g.fillRect(c - 160 + rnd() * 310, c - 130 + rnd() * 250, 6 + rnd() * 14, 3);
+
+      const structs = [];
+      // A roof with its shadow; registered as a structure that bombs can destroy
+      const building = (x, y, w, h, roof, name, ridges) => {
+        g.fillStyle = SHADOW; g.fillRect(x + 6, y + 6, w, h);
+        g.fillStyle = roof; g.fillRect(x, y, w, h);
+        if (ridges) { g.fillStyle = 'rgba(0,0,0,0.28)'; for (let r = 0; r < h; r += ridges) g.fillRect(x, y + r, w, Math.max(2, ridges * 0.4)); }
+        g.fillStyle = 'rgba(255,255,255,0.08)'; g.fillRect(x, y, w, 2); g.fillRect(x, y, 2, h);   // sunlit edges
+        structs.push({ x, y, w, h, name });
+      };
+      const tank = (x, y, r, name) => {
+        g.fillStyle = SHADOW; g.beginPath(); g.arc(x + 6, y + 6, r, 0, Math.PI * 2); g.fill();
+        g.fillStyle = '#bcb8ae'; g.beginPath(); g.arc(x, y, r, 0, Math.PI * 2); g.fill();
+        g.fillStyle = 'rgba(0,0,0,0.15)'; g.beginPath(); g.arc(x + 3, y + 3, r * 0.7, 0, Math.PI * 2); g.fill();
+        structs.push({ x: x - r, y: y - r, w: 2 * r, h: 2 * r, name });
+      };
+
+      let noun = 'structures';
       if (kind === 'harbor') {
-        g.fillStyle = '#3c5867'; g.fillRect(c - 150, c, 300, 120);                       // basin
-        g.fillStyle = '#9b978c'; for (let i = 0; i < 5; i++) g.fillRect(c - 130 + i * 60, c - 10, 14, 100); // piers
-        g.fillStyle = '#5f6266'; for (let i = 0; i < 4; i++) g.fillRect(c - 115 + i * 60, c + 20, 9, 60); // ships
-        g.fillStyle = '#b8b4aa'; g.fillRect(c - 110, c - 95, 220, 70);                   // U-boat pens / sheds
-        g.fillStyle = '#7b776e'; for (let i = 0; i < 8; i++) g.fillRect(c - 106 + i * 27, c - 92, 20, 64);
+        noun = 'pens, ships and sheds';
+        g.fillStyle = '#3c5867'; g.fillRect(c - 160, c + 5, 320, 125);                         // basin
+        g.fillStyle = '#9b978c'; for (let i = 0; i < 5; i++) g.fillRect(c - 130 + i * 60, c - 5, 14, 100); // piers
+        for (let i = 0; i < 4; i++) building(c - 113 + i * 60, c + 25, 10, 58, '#5f6266', 'a U-boat', 0);
+        // the pens: one massive concrete block, each bay a separate target
+        g.fillStyle = SHADOW; g.fillRect(c - 110 + 7, c - 100 + 7, 220, 72);
+        for (let i = 0; i < 8; i++) building(c - 110 + i * 27.5, c - 100, 26, 72, '#b3afa5', 'the pens', 6);
+        building(c + 120, c - 110, 34, 50, '#8f8a80', 'the workshops', 7);
+        building(c - 150, c - 110, 30, 44, '#8f8a80', 'the stores', 7);
       } else if (kind === 'rail') {
+        noun = 'yard targets';
         g.strokeStyle = '#3a3630'; g.lineWidth = 2;
         for (let i = -14; i <= 14; i++) { g.beginPath(); g.moveTo(c - 150, c + i * 7); g.lineTo(c + 150, c + i * 6 + 8); g.stroke(); }
-        g.fillStyle = '#5c5850'; for (let i = 0; i < 40; i++) g.fillRect(c - 140 + rnd() * 260, c - 90 + rnd() * 180, 16, 4); // wagons
-        g.fillStyle = '#8f8a80'; g.beginPath(); g.arc(c + 95, c - 80, 34, 0, Math.PI); g.fill(); // roundhouse
+        for (let k = 0; k < 6; k++) {   // strings of wagons on the sidings
+          const x = c - 140 + (k % 3) * 95, y = c - 70 + Math.floor(k / 3) * 75 + rnd() * 20;
+          building(x, y, 80, 6, '#5c5850', 'the wagons', 0);
+        }
+        g.fillStyle = SHADOW; g.beginPath(); g.arc(c + 101, c - 74, 36, 0, Math.PI); g.fill();
+        g.fillStyle = '#8f8a80'; g.beginPath(); g.arc(c + 95, c - 80, 36, 0, Math.PI); g.fill();
+        structs.push({ x: c + 59, y: c - 80, w: 72, h: 36, name: 'the roundhouse' });
+        building(c - 150, c - 120, 90, 26, '#9a958a', 'the goods shed', 6);
+        building(c - 30, c + 95, 60, 22, '#9a958a', 'the goods shed', 6);
+        building(c + 40, c - 118, 14, 14, '#7a6a5a', 'the signal box', 0);
       } else if (kind === 'refinery') {
-        for (let i = 0; i < 24; i++) {
-          const x = c - 120 + (i % 6) * 48, y = c - 80 + Math.floor(i / 6) * 48;
-          g.fillStyle = '#b9b5ab'; g.beginPath(); g.arc(x, y, 15, 0, Math.PI * 2); g.fill();
-          g.fillStyle = 'rgba(0,0,0,0.3)'; g.beginPath(); g.arc(x + 4, y + 4, 15, 0, Math.PI * 2); g.fill();
-        }
+        noun = 'tanks and plant';
+        for (let i = 0; i < 12; i++) tank(c - 125 + (i % 4) * 46, c - 90 + Math.floor(i / 4) * 50, 17, 'a storage tank');
         g.strokeStyle = '#4a4740'; g.lineWidth = 3;
-        for (let i = 0; i < 6; i++) { g.beginPath(); g.moveTo(c - 140, c - 100 + i * 40); g.lineTo(c + 140, c - 100 + i * 40); g.stroke(); }
+        for (let i = 0; i < 4; i++) { g.beginPath(); g.moveTo(c - 140, c - 112 + i * 50); g.lineTo(c + 150, c - 112 + i * 50); g.stroke(); }
+        building(c + 70, c - 100, 60, 70, '#8a857b', 'the cracking plant', 8);
+        building(c + 75, c + 0, 50, 40, '#9a958a', 'the pump house', 6);
+        building(c - 120, c + 75, 110, 26, '#9a958a', 'the boiler house', 6);
       } else {
-        // factory: long sheds with sawtooth roofs, chimneys and a rail siding
+        noun = 'factory buildings';
         for (let k = 0; k < 5; k++) {
-          const x = c - 130 + (k % 3) * 90, y = c - 100 + Math.floor(k / 3) * 110;
-          g.fillStyle = '#a9a59b'; g.fillRect(x, y, 78, 90);
-          g.fillStyle = '#6e6b63'; for (let r = 0; r < 90; r += 9) g.fillRect(x, y + r, 78, 4);
+          const x = c - 135 + (k % 3) * 92, y = c - 105 + Math.floor(k / 3) * 110;
+          building(x, y, 78, 90, '#a9a59b', 'the machine shops', 9);
         }
-        g.fillStyle = '#2b2925'; [[c + 110, c - 70], [c + 120, c + 30], [c - 20, c + 105]].forEach(([x, y]) => { g.beginPath(); g.arc(x, y, 8, 0, Math.PI * 2); g.fill(); });
+        building(c + 60, c + 15, 60, 40, '#8a857b', 'the power house', 7);
+        g.fillStyle = '#2b2925';
+        [[c + 110, c - 70], [c + 125, c + 30], [c - 20, c + 110]].forEach(([x, y]) => {
+          g.fillStyle = 'rgba(18,20,14,0.5)'; g.fillRect(x, y - 3, 26, 6);              // long chimney shadow
+          g.fillStyle = '#2b2925'; g.beginPath(); g.arc(x, y, 8, 0, Math.PI * 2); g.fill();
+        });
         g.strokeStyle = '#3a3630'; g.lineWidth = 3; g.beginPath(); g.moveTo(c - 160, c + 125); g.lineTo(c + 160, c + 110); g.stroke();
       }
+      structs.forEach(s => { s.hit = false; });
+      return { structs, noun };
+    }
+
+    // Texture pixels <-> ground (bombsight group) units. The 2048 px texture covers 2400 x 2400 units.
+    const AREA_PX = 2048, AREA_UNITS = 2400, PX_TO_U = AREA_UNITS / AREA_PX;
+    const pxToGround = (px, py) => new THREE.Vector3((px - AREA_PX / 2) * PX_TO_U, 0, (py - AREA_PX / 2) * PX_TO_U);
+    const groundToPx = (v) => [v.x / PX_TO_U + AREA_PX / 2, v.z / PX_TO_U + AREA_PX / 2];
+
+    function paintCrater(g, px, py) {
+      const r = 7 + Math.random() * 4;
+      g.fillStyle = 'rgba(120,105,85,0.55)'; g.beginPath(); g.arc(px, py, r * 1.9, 0, Math.PI * 2); g.fill();   // thrown earth
+      g.fillStyle = '#2a241d'; g.beginPath(); g.arc(px, py, r, 0, Math.PI * 2); g.fill();
+      g.fillStyle = 'rgba(0,0,0,0.5)'; g.beginPath(); g.arc(px + 2, py + 2, r * 0.6, 0, Math.PI * 2); g.fill();
+    }
+    function paintWreck(g, s) {
+      // Roof gone: scorched shell with rubble and a burnt-out interior
+      const cx = s.x + s.w / 2, cy = s.y + s.h / 2;
+      const grad = g.createRadialGradient(cx, cy, 2, cx, cy, Math.max(s.w, s.h) * 0.8);
+      grad.addColorStop(0, 'rgba(10,8,6,0.95)'); grad.addColorStop(0.6, 'rgba(40,32,26,0.85)'); grad.addColorStop(1, 'rgba(40,32,26,0)');
+      g.fillStyle = grad; g.fillRect(s.x - s.w * 0.3, s.y - s.h * 0.3, s.w * 1.6, s.h * 1.6);
+      for (let i = 0; i < Math.max(6, (s.w * s.h) / 60); i++) {
+        g.fillStyle = Math.random() < 0.5 ? '#6d655a' : '#3d3730';
+        g.fillRect(s.x + Math.random() * s.w, s.y + Math.random() * s.h, 2 + Math.random() * 5, 2 + Math.random() * 4);
+      }
+      g.strokeStyle = 'rgba(150,140,125,0.6)'; g.lineWidth = 1.5; g.strokeRect(s.x + 1, s.y + 1, s.w - 2, s.h - 2);   // standing walls
     }
 
     function buildBombsightScene() {
@@ -3698,7 +3787,12 @@
         const m = state.mission;
         // fresh target area for this mission
         if (bsight.areaMesh) { bsight.group.remove(bsight.areaMesh); bsight.areaMesh.material.map.dispose(); bsight.areaMesh.material.dispose(); }
-        const tex = makeCanvasTexture(2048, 2048, (g, w) => drawTargetArea(g, w, targetKind(m.target)));
+        let area = null;
+        const tex = makeCanvasTexture(AREA_PX, AREA_PX, (g, w) => { area = drawTargetArea(g, w, targetKind(m.target)); });
+        bsight.area = area;
+        bsight.areaTex = tex;
+        bsight.areaCtx = tex.image.getContext('2d');
+        bsight.burning = [];
         bsight.areaMesh = new THREE.Mesh(new THREE.PlaneGeometry(2400, 2400), new THREE.MeshLambertMaterial({ map: tex }));
         bsight.areaMesh.rotation.x = -Math.PI / 2;
         bsight.group.add(bsight.areaMesh);
@@ -3799,7 +3893,20 @@
           bsight.group.remove(b.mesh);
           bsight.bombs.splice(i, 1);
           bombBurst(b.end, b.onTarget);
+          applyImpact(b);
         }
+      }
+      // Burning buildings keep pouring smoke up into the sky
+      for (const bn of bsight.burning) {
+        bn.timer -= dt;
+        if (bn.timer > 0) continue;
+        bn.timer = 0.12 + Math.random() * 0.15;
+        const sp = new THREE.Sprite(new THREE.SpriteMaterial({ map: cloudTextures[Math.floor(Math.random() * 4)],
+          color: 0x26231f, transparent: true, opacity: 0, depthWrite: false }));
+        sp.position.set(bn.pos.x + (Math.random() - 0.5) * bn.size * 0.6, 6, bn.pos.z + (Math.random() - 0.5) * bn.size * 0.6);
+        sp.scale.setScalar(bn.size * 0.6);
+        bsight.group.add(sp);
+        bsight.fx.push({ sprite: sp, kind: 'column', size: bn.size * 0.6, life: 6 + Math.random() * 3, age: 0, peak: 0.55 + Math.random() * 0.25 });
       }
       for (let i = bsight.fx.length - 1; i >= 0; i--) {
         const e = bsight.fx[i];
@@ -3812,6 +3919,11 @@
           e.sprite.scale.setScalar(e.size * (0.4 + a * 1.6));
           e.sprite.position.x += 6 * dt;   // drifting with the wind
           e.sprite.material.opacity = Math.max(0, 0.8 * (1 - a));
+        } else if (e.kind === 'column') {   // rising smoke from a burning building, leaning with the wind
+          e.sprite.position.y += 26 * dt;
+          e.sprite.position.x += 9 * dt;
+          e.sprite.scale.setScalar(e.size * (1 + a * 3));
+          e.sprite.material.opacity = e.peak * Math.min(1, a * 5) * (1 - a);
         } else {                           // fire: flickers and keeps burning
           e.sprite.scale.setScalar(e.size * (0.85 + Math.random() * 0.3) * Math.min(1, e.age * 2));
           e.sprite.material.opacity = 0.65 + Math.random() * 0.3;
@@ -3886,6 +3998,29 @@
       bsight.shake = Math.max(bsight.shake, 0.15);
     }
 
+    // A bomb has hit the ground: crater the texture, wreck anything it landed on and set it burning
+    function applyImpact(b) {
+      const g = bsight.areaCtx, area = bsight.area;
+      if (!g || !area) return;
+      for (const idx of b.hits) {
+        const st = area.structs[idx];
+        if (st.wrecked) continue;
+        st.wrecked = true;
+        paintWreck(g, st);
+        const centre = pxToGround(st.x + st.w / 2, st.y + st.h / 2);
+        const size = Math.max(14, Math.max(st.w, st.h) * PX_TO_U);
+        bsight.burning.push({ pos: centre, size, timer: Math.random() * 0.3 });
+        const fire = new THREE.Sprite(new THREE.SpriteMaterial({ map: cloudTextures[Math.floor(Math.random() * 4)], color: 0xff6a1a,
+          transparent: true, depthWrite: false, blending: THREE.AdditiveBlending }));
+        fire.position.set(centre.x, 3, centre.z);
+        bsight.group.add(fire);
+        bsight.fx.push({ sprite: fire, kind: 'fire', size: size * 0.9, life: 60, age: 0 });
+      }
+      const [px, py] = groundToPx(b.end);
+      paintCrater(g, px, py);
+      bsight.areaTex.needsUpdate = true;
+    }
+
     function releaseBombs() {
       bsight.dropped = true;
       bsight.dropT = bsight.t;
@@ -3904,20 +4039,32 @@
       let inTarget = 0;
       for (let i = 0; i < 10; i++) {
         const end = new THREE.Vector3(-dx + (Math.random() - 0.5) * 14, 0, -dz + 45 - i * 10 + (Math.random() - 0.5) * 6);
-        const onTarget = Math.hypot(end.x, end.z) < TARGET_R;
+        // Which structures this bomb lands on (with a little blast radius around the roof)
+        const [px, py] = groundToPx(end);
+        const PAD = 11;   // ~13 units of blast around each roof
+        const hits = [];
+        (bsight.area ? bsight.area.structs : []).forEach((st, k) => {
+          if (px > st.x - PAD && px < st.x + st.w + PAD && py > st.y - PAD && py < st.y + st.h + PAD) { hits.push(k); st.hit = true; }
+        });
+        const onTarget = hits.length > 0 || Math.hypot(end.x, end.z) < TARGET_R;
         if (onTarget) inTarget++;
         const mesh = new THREE.Mesh(geo, mat);
         mesh.visible = false;
         bsight.group.add(mesh);
-        bsight.bombs.push({ mesh, end, onTarget, t0: bsight.t + i * 0.12, fall: 4.4 });
+        bsight.bombs.push({ mesh, end, onTarget, hits, t0: bsight.t + i * 0.12, fall: 4.4 });
       }
       const m = state.mission;
+      const structs = bsight.area ? bsight.area.structs : [];
+      const total = structs.length, destroyed = structs.filter(st => st.hit).length;
+      const noun = bsight.area ? bsight.area.noun : 'structures';
+      const firstKill = structs.find(st => st.hit);
+      // One stick can't flatten the whole works: grade on where the stick fell and what it wrecked
       let grade, line;
-      if (inTarget >= 8)      { grade = 'Direct hits';  line = `Shacked it! ${inTarget} of 10 right on the ${m.target}!`; }
-      else if (inTarget >= 4) { grade = 'On target';    line = `Good bombs: ${inTarget} of 10 in the target area.`; }
-      else if (inTarget >= 1) { grade = 'Near miss';    line = `Near miss: the stick fell ${dir}, only ${inTarget} of 10 on the target.`; }
-      else                    { grade = 'Missed';       line = `Missed: the bombs fell well ${dir} of the target.`; }
-      state.bombResult = { grade, line, yards, dir, inTarget, flakHits: bsight.flakHits };
+      if (inTarget >= 8 && destroyed >= 2) { grade = 'Direct hits';  line = `Shacked it! ${destroyed} of ${total} ${noun} destroyed!`; }
+      else if (inTarget >= 4 || destroyed >= 2) { grade = 'On target';    line = `Good bombs: ${destroyed} of ${total} ${noun} destroyed.`; }
+      else if (destroyed || inTarget) { grade = 'Near miss'; line = `The stick fell ${dir}: only ${destroyed} of ${total} ${noun} hit.`; }
+      else                         { grade = 'Missed';       line = `Missed: the bombs fell well ${dir} of the ${m.target}.`; }
+      state.bombResult = { grade, line, yards, dir, inTarget, destroyed, total, noun, flakHits: bsight.flakHits };
       bsUI.away.classList.add('show');
       setTimeout(() => bsUI.away.classList.remove('show'), 2200);
       showRadio('BOMBARDIER', 'Bombs away!', 2600);
@@ -3925,7 +4072,8 @@
       sound.playBombWhistle(0.45, 2.6);
       sound.playBombWhistle(0.8, 3.0);
       setTimeout(() => {
-        if (bsight.active) showRadio('BOMBARDIER', grade === 'Missed' ? 'Damn, we missed it.' : `${inTarget} of 10 on the target!`, 3000);
+        if (bsight.active) showRadio('BOMBARDIER', grade === 'Missed' ? 'Damn, we missed it.'
+          : firstKill ? `Got ${firstKill.name}! ${destroyed} of ${total} ${noun} hit.` : 'Close, but the stick fell just off the works.', 3200);
       }, 5800);
     }
 
